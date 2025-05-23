@@ -1,0 +1,39 @@
+{
+  "tasks": {
+    "start": "deno run --allow-net --allow-read --allow-write --allow-env --unstable-kv server.js",
+    "dev": "deno run --watch --allow-net --allow-read --allow-write --allow-env --unstable-kv server.js",
+    "fmt": "deno fmt",
+    "lint": "deno lint",
+    "clear-kv": "deno run --allow-read --allow-write --unstable-kv clear_kv.js"
+  },
+  "compilerOptions": {
+    "lib": ["deno.ns", "deno.unstable"]
+  },
+  "fmt": {
+    "files": {
+      "include": ["**/*.ts", "**/*.js", "**/*.json", "**/*.md"],
+      "exclude": []
+    },
+    "options": {
+      "useTabs": false,
+      "lineWidth": 80,
+      "indentWidth": 2,
+      "singleQuote": false,
+      "proseWrap": "preserve"
+    }
+  },
+  "lint": {
+    "files": {
+      "include": ["**/*.ts", "**/*.js"],
+      "exclude": []
+    },
+    "rules": {
+      "tags": ["recommended"],
+      "include": [],
+      "exclude": []
+    }
+  },
+  "imports": {
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.4"
+  }
+}
