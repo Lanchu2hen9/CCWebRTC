@@ -15,24 +15,24 @@
       <input
         class="NameInput"
         type="text"
-        id="Username"
+        id="NameInput"
         name="username"
         placholder="Enter Your Name."
         maxlength="20"
       />
-      <button id="startButton">Start Call</button>
+      <button class="startButton" id="startButton">Start Call</button>
     </div>
     <div class="video-container">
       <div class="video-box">
         <video id="localVideo" autoplay playsinline muted></video>
-        <h2>
+        <h2 id="UsernameLocal">
           Local
           <div class="NameBox"></div>
         </h2>
       </div>
       <div class="video-box">
         <video id="remoteVideo" autoplay playsinline></video>
-        <h2>
+        <h2 id="UsernameRemote">
           Remote
           <div class="NameBox"></div>
         </h2>

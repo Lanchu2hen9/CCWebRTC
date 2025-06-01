@@ -1,3 +1,66 @@
+// #region Start Section
+const StartSection = document.querySelector("#StartSection");
+const NameInput = document.querySelector("#NameInput");
+const StartButton = document.querySelector("#startButton");
+const Loading = document.querySelector("#Loading");
+
+let userName = "";
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelector(".video-container").style.display = "none";
+  document.querySelector(".controls").style.displahy = "none";
+});
+
+StartButton.addEventListener("click", async () => {
+  userName = NameInput.value.trim();
+  if (!userName) {
+    alert("Need your name to start the call!.");
+    return;
+  }
+
+  Loading.classList.remove("hidden");
+  startButton.disabled = true;
+  NameInput.disabled = true;
+
+  try {
+    setTimeout(() => {
+      StartSection.style.display = "none";
+
+      document.querySelector(".video-container").style.display = "flex";
+      document.querySelector(".controls").style.display = "block";
+
+      const LocalName = document.querySelector("#UsernameLocal");
+      LocalName.textContent = userName;
+
+      if (dataChannel && dataChannel.readyState === "open") {
+        sendUsername();
+      }
+    }, 1500);
+  } catch (error) {
+    console.error("Error starting session:", error);
+    Loading.classList.add("hidden");
+    startButton.disabled = false;
+    NameInput.disabled = false;
+  }
+});
+
+function sendUsername() {
+  if (dataChannel && dataChannel.readyState === "open") {
+    const messagePayload = {
+      type: "username",
+      username: userName,
+    };
+    dataChannel.send(JSON.stringify(messagePayload));
+  }
+}
+
+NameInput.addEventListener("keypress", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    StartButton.click();
+  }
+});
+// #endregion
+
 // DOM Elements
 const localVideo = document.getElementById("localVideo");
 const remoteVideo = document.getElementById("remoteVideo");
@@ -287,6 +350,31 @@ function setupDataChannelEvents(channel) {
     sendButton.disabled = false;
     displayChatMessage("System", "Chat connected (already open)!");
   }
+
+  channel.onmessage = (event) => {
+    try {
+      const messageData = JSON.parse(event.data);
+      if (messageData.type === "username") {
+        // Update remote username
+        const RemoteName = document.querySelector("#UsernameRemote .NameBox");
+        RemoteName.textContent = messageData.username;
+      } else {
+        // Handle regular chat messages
+        displayChatMessage("Remote", messageData.message);
+      }
+    } catch (_e) {
+      displayChatMessage("Remote (raw)", event.data);
+    }
+  };
+
+  channel.onopen = () => {
+    console.log(`Data channel '${channel.label}' is open.`);
+    chatInput.disabled = false;
+    sendButton.disabled = false;
+    displayChatMessage("System", "Chat connected!");
+    // Send username when connection opens
+    sendUsername();
+  };
 }
 
 function sendMessage() {

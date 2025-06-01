@@ -128,3 +128,83 @@ video {
   cursor: pointer;
   border-radius: 0 4px 4px 0;
 }
+
+/* #region Start Screen */
+.StartSection {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #1f1e1efd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+
+  flex-direction: column;
+  text-align: center;
+}
+
+.NameInput {
+  padding: 10px 20px;
+  font-size: 18px;
+  margin-bottom: 20px;
+  border: 2px solid #89b8eb;
+  border-radius: 5px;
+  background-color: #fff;
+  color: #333;
+  width: 300px;
+}
+
+.NameInput::placeholder {
+  color: #929090;
+}
+
+.startButton {
+  padding: 10px 20px;
+  margin: 0 10px;
+  font-size: 1em;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+}
+
+.startButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.startButton:hover {
+  background-color: #0056b3;
+}
+
+.loading {
+  display: none;
+}
+
+.SpinnyBoi {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3; /* Light grey */
+  border-top: 5px solid #3498db; /* Blue */
+  border-radius: 50%;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.Loading > p {
+  color: #f3f3f3;
+  margin-top: 10px;
+}
+/* #endregion */
