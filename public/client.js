@@ -29,7 +29,7 @@ async function fetchIceServers() {
       console.error(
         "Failed to fetch ICE servers from API:",
         response.status,
-        await response.text(),
+        await response.text()
       );
       console.log("Using default fallback ICE configuration.");
       return;
@@ -39,11 +39,11 @@ async function fetchIceServers() {
       iceConfiguration.iceServers = servers;
       console.log(
         "Successfully fetched and updated ICE configuration:",
-        iceConfiguration.iceServers.map(s => s.urls).join(', ')
+        iceConfiguration.iceServers.map((s) => s.urls).join(", ")
       );
     } else {
       console.warn(
-        "Fetched ICE servers list from API is empty, using default fallback.",
+        "Fetched ICE servers list from API is empty, using default fallback."
       );
     }
   } catch (error) {
@@ -52,6 +52,7 @@ async function fetchIceServers() {
   }
 }
 
+// #region Video Call & Chat Eventlistners
 // --- Initialization and Event Listeners ---
 startButton.addEventListener("click", startSession);
 hangupButton.addEventListener("click", hangUp);
@@ -61,6 +62,7 @@ chatInput.addEventListener("keypress", (event) => {
     sendMessage();
   }
 });
+// #endregion
 
 async function startSession() {
   console.log("Attempting to start session...");
@@ -93,21 +95,33 @@ async function startSession() {
 
     // ---- Offer/Answer logic based on the now-set isInitiator flag ----
     if (isInitiator) {
-      if (peerConnection) { // Ensure peerConnection is created
+      if (peerConnection) {
+        // Ensure peerConnection is created
         console.log("Initiator: Creating offer...");
         const offerSdp = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offerSdp);
-        console.log("Initiator's Local SDP Offer (first 500 chars):", peerConnection.localDescription.sdp.substring(0, 500));
+        console.log(
+          "Initiator's Local SDP Offer (first 500 chars):",
+          peerConnection.localDescription.sdp.substring(0, 500)
+        );
         await sendSignalMessage("offer", offerSdp);
         console.log("Sent offer to signaling server.");
       }
-    } else { // This client is the receiver
-      if (peerConnection && offerSignal && offerSignal.payload) { // Ensure peerConnection and offerSignal are valid
-        console.log("Receiver: Processing existing offer from signaling server:", offerSignal.payload.type);
+    } else {
+      // This client is the receiver
+      if (peerConnection && offerSignal && offerSignal.payload) {
+        // Ensure peerConnection and offerSignal are valid
+        console.log(
+          "Receiver: Processing existing offer from signaling server:",
+          offerSignal.payload.type
+        );
         await peerConnection.setRemoteDescription(
           new RTCSessionDescription(offerSignal.payload)
         );
-        console.log("Receiver's Remote SDP Offer (first 500 chars):", peerConnection.remoteDescription.sdp.substring(0, 500));
+        console.log(
+          "Receiver's Remote SDP Offer (first 500 chars):",
+          peerConnection.remoteDescription.sdp.substring(0, 500)
+        );
         console.log("Set remote description from offer. Creating answer...");
         const answerSdp = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answerSdp);
@@ -115,7 +129,9 @@ async function startSession() {
         console.log("Sent answer to signaling server.");
         await clearSignalMessage("offer");
       } else {
-        console.error("Receiver: PeerConnection or Offer signal is missing/invalid. Cannot proceed.");
+        console.error(
+          "Receiver: PeerConnection or Offer signal is missing/invalid. Cannot proceed."
+        );
         hangUp();
         return;
       }
@@ -125,25 +141,36 @@ async function startSession() {
   } catch (e) {
     console.error("Error starting WebRTC session:", e);
     alert("Could not start session: " + e.message);
-    hangUp(); 
+    hangUp();
   }
 }
 
 function createPeerConnection() {
   peerConnection = new RTCPeerConnection(iceConfiguration);
-  console.log("Created RTCPeerConnection with configuration:", JSON.stringify(iceConfiguration));
+  console.log(
+    "Created RTCPeerConnection with configuration:",
+    JSON.stringify(iceConfiguration)
+  );
 
   peerConnection.onicecandidate = (event) => {
     if (event.candidate && event.candidate.candidate) {
-      console.log("Local ICE candidate gathered:", event.candidate.candidate.substring(0, 70) + "...");
+      console.log(
+        "Local ICE candidate gathered:",
+        event.candidate.candidate.substring(0, 70) + "..."
+      );
       const candidateKey = isInitiator
         ? "candidate_initiator" // Server stores this as "candidates_for_receiver"
-        : "candidate_receiver";  // Server stores this as "candidates_for_initiator"
+        : "candidate_receiver"; // Server stores this as "candidates_for_initiator"
       sendSignalMessage(candidateKey, event.candidate);
     } else if (!event.candidate) {
-      console.log("All local ICE candidates gathered (end-of-candidates signal).");
+      console.log(
+        "All local ICE candidates gathered (end-of-candidates signal)."
+      );
     } else {
-      console.log("Local ICE candidate gathered, but candidate string is empty. Not sending.", event.candidate);
+      console.log(
+        "Local ICE candidate gathered, but candidate string is empty. Not sending.",
+        event.candidate
+      );
     }
   };
 
@@ -160,13 +187,15 @@ function createPeerConnection() {
     if (peerConnection) {
       console.log(
         "ICE connection state changed to:",
-        peerConnection.iceConnectionState,
+        peerConnection.iceConnectionState
       );
       if (peerConnection.iceConnectionState === "failed") {
-          console.error("ICE connection failed. Check STUN/TURN server and network.");
+        console.error(
+          "ICE connection failed. Check STUN/TURN server and network."
+        );
       }
       if (peerConnection.iceConnectionState === "connected") {
-          console.log("ICE connection established successfully!");
+        console.log("ICE connection established successfully!");
       }
       if (
         peerConnection.iceConnectionState === "disconnected" ||
@@ -176,7 +205,7 @@ function createPeerConnection() {
       }
     }
   };
-  
+
   peerConnection.onsignalingstatechange = () => {
     if (peerConnection) {
       console.log("Signaling state changed to:", peerConnection.signalingState);
@@ -196,22 +225,30 @@ function createPeerConnection() {
     // Explicitly create data channel before offer.
     // Options: { negotiated: false } is default for this setup (in-band).
     // { ordered: true, reliable: true } are also defaults for "chat"-like channels.
-    dataChannel = peerConnection.createDataChannel("chat", { negotiated: false }); 
-    console.log(`Initiator created dataChannel, initial readyState: ${dataChannel.readyState}`); 
+    dataChannel = peerConnection.createDataChannel("chat", {
+      negotiated: false,
+    });
+    console.log(
+      `Initiator created dataChannel, initial readyState: ${dataChannel.readyState}`
+    );
     setupDataChannelEvents(dataChannel);
   } else {
     // Receiver sets up listener for when data channel is announced by initiator's offer
     peerConnection.ondatachannel = (event) => {
-      console.log("Receiver received 'ondatachannel' event."); 
+      console.log("Receiver received 'ondatachannel' event.");
       dataChannel = event.channel;
-      console.log(`Receiver received dataChannel '${dataChannel.label}', initial readyState: ${dataChannel.readyState}`); 
+      console.log(
+        `Receiver received dataChannel '${dataChannel.label}', initial readyState: ${dataChannel.readyState}`
+      );
       setupDataChannelEvents(dataChannel);
     };
   }
 }
 
 function setupDataChannelEvents(channel) {
-  console.log(`Setting up data channel event listeners for channel '${channel.label}', current readyState: ${channel.readyState}`); 
+  console.log(
+    `Setting up data channel event listeners for channel '${channel.label}', current readyState: ${channel.readyState}`
+  );
   channel.onopen = () => {
     console.log(`Data channel '${channel.label}' is open.`);
     chatInput.disabled = false;
@@ -225,22 +262,26 @@ function setupDataChannelEvents(channel) {
     displayChatMessage("System", "Chat disconnected.");
   };
   channel.onmessage = (event) => {
-    console.log(`Message received on data channel: ${event.data.substring(0,50)}...`);
+    console.log(
+      `Message received on data channel: ${event.data.substring(0, 50)}...`
+    );
     try {
-      const messageData = JSON.parse(event.data); 
+      const messageData = JSON.parse(event.data);
       // Always display received messages as "Remote"
-      displayChatMessage("Remote", messageData.message); 
+      displayChatMessage("Remote", messageData.message);
     } catch (_e) {
       // Fallback for non-JSON messages, also label as Remote
-      displayChatMessage("Remote (raw)", event.data); 
+      displayChatMessage("Remote (raw)", event.data);
     }
   };
   channel.onerror = (error) => {
-    console.error(`Data channel '${channel.label}' ERROR:`, error); 
+    console.error(`Data channel '${channel.label}' ERROR:`, error);
   };
   // ADD THIS to see if it's already open when events are attached (less likely but possible)
   if (channel.readyState === "open") {
-    console.warn(`Data channel '${channel.label}' was already open when event listeners were attached.`);
+    console.warn(
+      `Data channel '${channel.label}' was already open when event listeners were attached.`
+    );
     // Manually trigger open state logic if so (though onopen should still fire)
     chatInput.disabled = false;
     sendButton.disabled = false;
@@ -260,7 +301,7 @@ function sendMessage() {
     chatInput.value = "";
   } else {
     console.warn(
-      "Cannot send message. Data channel not open or message empty.",
+      "Cannot send message. Data channel not open or message empty."
     );
   }
 }
@@ -269,7 +310,7 @@ function displayChatMessage(sender, message) {
   const p = document.createElement("p");
   p.textContent = `[${sender}]: ${message}`;
   chatLog.appendChild(p);
-  chatLog.scrollTop = chatLog.scrollHeight; 
+  chatLog.scrollTop = chatLog.scrollHeight;
 }
 
 async function hangUp() {
@@ -284,7 +325,7 @@ async function hangUp() {
   localStream = null;
 
   if (remoteStream) {
-    remoteStream.getTracks().forEach((track) => track.stop()); 
+    remoteStream.getTracks().forEach((track) => track.stop());
   }
   remoteStream = null;
 
@@ -300,17 +341,18 @@ async function hangUp() {
   hangupButton.disabled = true;
   chatInput.disabled = true;
   sendButton.disabled = true;
-  
-  console.log("Attempting to clear offer/answer signals from server for this room...");
+
+  console.log(
+    "Attempting to clear offer/answer signals from server for this room..."
+  );
   await clearSignalMessage("offer"); // For offer
   await clearSignalMessage("answer"); // For answer
   // Note: Candidate clearing in hangUp is now less effective as specific keys are needed.
   // Individual candidates are cleared during polling. Aggressive cleanup here would require
   // fetching all candidate keys for the room and deleting them, or a specific server endpoint.
   console.log("Session terminated.");
-  isInitiator = false; 
+  isInitiator = false;
 }
-
 
 async function sendSignalMessage(type, payload) {
   try {
@@ -318,13 +360,13 @@ async function sendSignalMessage(type, payload) {
     const response = await fetch(`/signal?room=${ROOM_ID}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: type, payload: payload }), 
+      body: JSON.stringify({ type: type, payload: payload }),
     });
     if (!response.ok) {
       console.error(
         `Failed to send signal message ${type}:`,
         response.status,
-        await response.text(),
+        await response.text()
       );
     }
   } catch (error) {
@@ -332,33 +374,40 @@ async function sendSignalMessage(type, payload) {
   }
 }
 
-async function getSignalMessage(type, suppressLog = false) { // Added suppressLog for quieter polling when connected
+async function getSignalMessage(type, suppressLog = false) {
+  // Added suppressLog for quieter polling when connected
   try {
     const response = await fetch(`/signal?room=${ROOM_ID}&type=${type}`);
     if (response.ok) {
-      const data = await response.json(); 
+      const data = await response.json();
       // For candidates, data will be an array. For offer/answer, an object or null.
       if (type.startsWith("candidate_")) {
-        if (!suppressLog || (Array.isArray(data) && data.length > 0)) { // Log if not suppressed OR if data exists
-          console.log(`Received ${data ? data.length : 0} ${type} signals from /signal.`);
+        if (!suppressLog || (Array.isArray(data) && data.length > 0)) {
+          // Log if not suppressed OR if data exists
+          console.log(
+            `Received ${data ? data.length : 0} ${type} signals from /signal.`
+          );
         }
       } else {
-        console.log(`Received signal for ${type} from /signal:`, data ? data.type : 'null');
+        console.log(
+          `Received signal for ${type} from /signal:`,
+          data ? data.type : "null"
+        );
       }
-      return data; 
+      return data;
     }
     if (response.status === 404) {
       // For candidates, an empty array is returned by server for "not found" (HTTP 200 with empty array),
       // so 404 is usually for offer/answer not found.
       if (!suppressLog) {
-          console.log(`No signal message of type ${type} found on server (404).`);
+        console.log(`No signal message of type ${type} found on server (404).`);
       }
-      return type.startsWith("candidate_") ? [] : null; 
+      return type.startsWith("candidate_") ? [] : null;
     }
     console.error(
       `Failed to get signal message ${type} from server:`,
       response.status,
-      await response.text(),
+      await response.text()
     );
     return type.startsWith("candidate_") ? [] : null; // Fallback to empty array for candidates on error
   } catch (error) {
@@ -373,67 +422,118 @@ async function pollForSignalMessages() {
     peerConnection.signalingState === "closed" ||
     hangupButton.disabled
   ) {
-    return; 
+    return;
   }
 
-  const isConnected = peerConnection.iceConnectionState === "connected" || 
-                      peerConnection.iceConnectionState === "completed";
+  const isConnected =
+    peerConnection.iceConnectionState === "connected" ||
+    peerConnection.iceConnectionState === "completed";
 
   try {
-    if (isInitiator) { // Initiator polls for answers and receiver's candidates
+    if (isInitiator) {
+      // Initiator polls for answers and receiver's candidates
       // Initiator always polls for an answer if it hasn't set remote description
       if (!peerConnection.remoteDescription) {
         const answerSignal = await getSignalMessage("answer"); // Expects single object
         if (answerSignal && answerSignal.payload) {
           console.log("Initiator received answer:", answerSignal.payload.type);
           await peerConnection.setRemoteDescription(
-            new RTCSessionDescription(answerSignal.payload),
+            new RTCSessionDescription(answerSignal.payload)
           );
           await clearSignalMessage("answer"); // Clear by type
         }
       }
-      
+
       // Poll for receiver's candidates if not yet connected OR if there might be stragglers
-      if (!isConnected || (Array.isArray(await getSignalMessage("candidate_receiver", true)))) { // Pass true to suppress "0 received" log if connected
-        const receiverCandidates = await getSignalMessage("candidate_receiver"); 
-        if (Array.isArray(receiverCandidates) && receiverCandidates.length > 0) {
-          console.log(`Initiator processing ${receiverCandidates.length} receiver candidates.`);
+      if (
+        !isConnected ||
+        Array.isArray(await getSignalMessage("candidate_receiver", true))
+      ) {
+        // Pass true to suppress "0 received" log if connected
+        const receiverCandidates = await getSignalMessage("candidate_receiver");
+        if (
+          Array.isArray(receiverCandidates) &&
+          receiverCandidates.length > 0
+        ) {
+          console.log(
+            `Initiator processing ${receiverCandidates.length} receiver candidates.`
+          );
           for (const candidateEntry of receiverCandidates) {
             if (candidateEntry.payload && candidateEntry.payload.candidate) {
-              console.log("Initiator adding remote (receiver's) ICE candidate:", candidateEntry.payload.candidate.substring(0,70) + "...");
-              await peerConnection.addIceCandidate(
-                new RTCIceCandidate(candidateEntry.payload),
+              console.log(
+                "Initiator adding remote (receiver's) ICE candidate:",
+                candidateEntry.payload.candidate.substring(0, 70) + "..."
               );
-              await clearSignalMessage(null, JSON.stringify(candidateEntry.key));
+              await peerConnection.addIceCandidate(
+                new RTCIceCandidate(candidateEntry.payload)
+              );
+              await clearSignalMessage(
+                null,
+                JSON.stringify(candidateEntry.key)
+              );
             } else {
-              console.warn("Initiator received receiver's candidate signal, but payload or candidate string is empty. Skipping.", candidateEntry);
-              if(candidateEntry.key) await clearSignalMessage(null, JSON.stringify(candidateEntry.key));
+              console.warn(
+                "Initiator received receiver's candidate signal, but payload or candidate string is empty. Skipping.",
+                candidateEntry
+              );
+              if (candidateEntry.key)
+                await clearSignalMessage(
+                  null,
+                  JSON.stringify(candidateEntry.key)
+                );
             }
           }
-        } else if (!isConnected && Array.isArray(receiverCandidates)) { // Only log "0 received" if not connected yet
-            console.log("Initiator: No new receiver candidates found yet.");
+        } else if (!isConnected && Array.isArray(receiverCandidates)) {
+          // Only log "0 received" if not connected yet
+          console.log("Initiator: No new receiver candidates found yet.");
         }
       }
-    } else { // Receiver polls for initiator's candidates
+    } else {
+      // Receiver polls for initiator's candidates
       // Poll for initiator's candidates if not yet connected OR if there might be stragglers
-      if (!isConnected || (Array.isArray(await getSignalMessage("candidate_initiator", true)))) { // Pass true to suppress "0 received" log
-        const initiatorCandidates = await getSignalMessage("candidate_initiator"); 
-        if (Array.isArray(initiatorCandidates) && initiatorCandidates.length > 0) {
-          console.log(`Receiver processing ${initiatorCandidates.length} initiator candidates.`);
+      if (
+        !isConnected ||
+        Array.isArray(await getSignalMessage("candidate_initiator", true))
+      ) {
+        // Pass true to suppress "0 received" log
+        const initiatorCandidates = await getSignalMessage(
+          "candidate_initiator"
+        );
+        if (
+          Array.isArray(initiatorCandidates) &&
+          initiatorCandidates.length > 0
+        ) {
+          console.log(
+            `Receiver processing ${initiatorCandidates.length} initiator candidates.`
+          );
           for (const candidateEntry of initiatorCandidates) {
             if (candidateEntry.payload && candidateEntry.payload.candidate) {
-              console.log("Receiver adding remote (initiator's) ICE candidate:", candidateEntry.payload.candidate.substring(0,70) + "...");
-              await peerConnection.addIceCandidate(
-                new RTCIceCandidate(candidateEntry.payload),
+              console.log(
+                "Receiver adding remote (initiator's) ICE candidate:",
+                candidateEntry.payload.candidate.substring(0, 70) + "..."
               );
-              await clearSignalMessage(null, JSON.stringify(candidateEntry.key));
+              await peerConnection.addIceCandidate(
+                new RTCIceCandidate(candidateEntry.payload)
+              );
+              await clearSignalMessage(
+                null,
+                JSON.stringify(candidateEntry.key)
+              );
             } else {
-              console.warn("Receiver received initiator's candidate signal, but payload or candidate string is empty. Skipping.", candidateEntry);
-              if(candidateEntry.key) await clearSignalMessage(null, JSON.stringify(candidateEntry.key));
+              console.warn(
+                "Receiver received initiator's candidate signal, but payload or candidate string is empty. Skipping.",
+                candidateEntry
+              );
+              if (candidateEntry.key)
+                await clearSignalMessage(
+                  null,
+                  JSON.stringify(candidateEntry.key)
+                );
             }
           }
-        } else if (!isConnected && Array.isArray(initiatorCandidates)) { // Only log "0 received" if not connected yet
-            console.log("Receiver: No new initiator candidates found yet.");
+        } else if (!isConnected && Array.isArray(initiatorCandidates)) {
+          // Only log "0 received" if not connected yet
+          console.log("Receiver: No new initiator candidates found yet.");
         }
       }
     }
@@ -442,14 +542,21 @@ async function pollForSignalMessages() {
   }
 
   // Determine if polling should continue
-  const stillNeedToPollOfferAnswer = isInitiator && !peerConnection.remoteDescription;
+  const stillNeedToPollOfferAnswer =
+    isInitiator && !peerConnection.remoteDescription;
   const iceStillNegotiating = !isConnected;
 
-  if (peerConnection && peerConnection.signalingState !== "closed" && !hangupButton.disabled) {
+  if (
+    peerConnection &&
+    peerConnection.signalingState !== "closed" &&
+    !hangupButton.disabled
+  ) {
     if (stillNeedToPollOfferAnswer || iceStillNegotiating) {
-      setTimeout(pollForSignalMessages, 2000); 
+      setTimeout(pollForSignalMessages, 2000);
     } else {
-      console.log("Connection established and offer/answer exchange complete. Stopping frequent polling.");
+      console.log(
+        "Connection established and offer/answer exchange complete. Stopping frequent polling."
+      );
       // Optionally, implement a much slower "cleanup" poll for any very late candidates, or stop entirely.
       // For now, we stop frequent polling once connected and offer/answer is done.
     }
@@ -462,28 +569,41 @@ async function clearSignalMessage(type, candidateKeyString = null) {
     if (candidateKeyString) {
       // Deleting a specific candidate by its full Deno KV key
       url += `&candidateKey=${encodeURIComponent(candidateKeyString)}`;
-      console.log(`Requesting to clear specific candidate on server. Key: ${candidateKeyString}`);
+      console.log(
+        `Requesting to clear specific candidate on server. Key: ${candidateKeyString}`
+      );
     } else if (type) {
       // Deleting an offer or answer by type
       url += `&type=${type}`;
       console.log(`Requesting to clear signal type: ${type} on server.`);
     } else {
-      console.warn("clearSignalMessage called without type or candidateKeyString.");
+      console.warn(
+        "clearSignalMessage called without type or candidateKeyString."
+      );
       return;
     }
 
     const response = await fetch(url, { method: "DELETE" });
     if (!response.ok && response.status !== 404) {
       console.error(
-        `Failed to clear signal message on server: ${type || candidateKeyString}`,
+        `Failed to clear signal message on server: ${
+          type || candidateKeyString
+        }`,
         response.status,
-        await response.text(),
+        await response.text()
       );
     } else {
-      console.log(`Signal message ${type || candidateKeyString} cleared on server (or was not present).`);
+      console.log(
+        `Signal message ${
+          type || candidateKeyString
+        } cleared on server (or was not present).`
+      );
     }
   } catch (error) {
-    console.error(`Error clearing signal message ${type || candidateKeyString} on server:`, error);
+    console.error(
+      `Error clearing signal message ${type || candidateKeyString} on server:`,
+      error
+    );
   }
 }
 

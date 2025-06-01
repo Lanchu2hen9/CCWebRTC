@@ -7,6 +7,21 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <div class="StartSection" id="StartSection">
+      <div class="Loading" id="Loading">
+        <div class="SpinnyBoi"></div>
+        <p>Loading...</p>
+      </div>
+      <input
+        class="NameInput"
+        type="text"
+        id="Username"
+        name="username"
+        placholder="Enter Your Name."
+        maxlength="20"
+      />
+      <button id="startButton">Start Call</button>
+    </div>
     <div class="video-container">
       <div class="video-box">
         <video id="localVideo" autoplay playsinline muted></video>
@@ -25,7 +40,6 @@
     </div>
 
     <div class="controls">
-      <button id="startButton">Start Session</button>
       <button id="hangupButton" disabled>Hang Up</button>
     </div>
 
