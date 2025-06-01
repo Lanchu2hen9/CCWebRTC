@@ -10,6 +10,11 @@ h2 {
   text-align: center;
 }
 
+.video-container,
+.controls {
+  display: none;
+}
+
 .video-container {
   display: flex;
   justify-content: space-between;
@@ -31,25 +36,13 @@ h2 {
 .video-box h2 {
   flex-shrink: 0;
   text-align: left;
-  color: white;
+  color: rgb(9, 9, 9);
   margin: 10px;
   font-size: 14pt;
   position: relative;
   top: -45px;
   left: 3px;
   z-index: 5;
-}
-
-.NameBox {
-  background-color: rgba(0, 0, 0, 0.7);
-  width: 200px;
-  height: 22px;
-  padding: 10px;
-  border-radius: 5px 5px 7px 5px;
-  position: relative;
-  top: -32px;
-  left: -13px;
-  z-index: -1;
 }
 
 video {
@@ -163,7 +156,7 @@ video {
 
 .startButton {
   padding: 10px 20px;
-  margin: 0 10px;
+  margin: -5px 10px;
   font-size: 1em;
   cursor: pointer;
   border: none;
@@ -181,7 +174,7 @@ video {
   background-color: #0056b3;
 }
 
-.loading {
+.Loading {
   display: none;
 }
 
@@ -206,5 +199,6 @@ video {
 .Loading > p {
   color: #f3f3f3;
   margin-top: 10px;
+  margin-bottom: 70px;
 }
 /* #endregion */

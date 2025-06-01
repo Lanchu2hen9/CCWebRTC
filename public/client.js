@@ -17,14 +17,18 @@ StartButton.addEventListener("click", async () => {
     return;
   }
 
-  Loading.classList.remove("hidden");
-  startButton.disabled = true;
-  NameInput.disabled = true;
+  NameInput.style.display = "none";
+  StartButton.disabled = "none";
+
+  Loading.style.display = "block";
 
   try {
+    // Step 5: Initialize WebRTC during the loading period
+    await startSession();
+
+    // Step 6: After delay, hide loading and show video
     setTimeout(() => {
       StartSection.style.display = "none";
-
       document.querySelector(".video-container").style.display = "flex";
       document.querySelector(".controls").style.display = "block";
 
@@ -37,8 +41,11 @@ StartButton.addEventListener("click", async () => {
     }, 1500);
   } catch (error) {
     console.error("Error starting session:", error);
-    Loading.classList.add("hidden");
-    startButton.disabled = false;
+    // If error, revert to initial state
+    Loading.style.display = "none";
+    NameInput.style.display = "block";
+    StartButton.style.display = "block";
+    StartButton.disabled = false;
     NameInput.disabled = false;
   }
 });
@@ -356,7 +363,7 @@ function setupDataChannelEvents(channel) {
       const messageData = JSON.parse(event.data);
       if (messageData.type === "username") {
         // Update remote username
-        const RemoteName = document.querySelector("#UsernameRemote .NameBox");
+        const RemoteName = document.querySelector("#UsernameRemote");
         RemoteName.textContent = messageData.username;
       } else {
         // Handle regular chat messages
