@@ -85,6 +85,7 @@ video {
   cursor: pointer;
 
   background-color: #f9edb0;
+  z-index: 7;
 }
 
 .MuteBtn img {
@@ -94,6 +95,10 @@ video {
 
 .MuteBtn:hover {
   background-color: #ffe665;
+}
+
+.MuteBtn.muted {
+  background-color: #ffa591;
 }
 
 .controls button:disabled {

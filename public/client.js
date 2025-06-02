@@ -96,6 +96,32 @@ MuteBtn.style.left = "calc(50% - 125px)";
 MuteBtn.style.top = "calc(100vh - 100px)";
 MuteBtn.style.transform = "translate(15px, 10px)";
 
+const MouseSneak = 80;
+const EdgePadding = 35;
+
+window.addEventListener("resize", () => {
+  const buttonRect = MuteBtn.getBoundingClientRect();
+
+  let currentLeft = buttonRect.left;
+  let currentTop = buttonRect.top;
+
+  const MaxLeft = window.innerWidth - buttonRect.width - EdgePadding;
+  const MaxTop = window.innerHeight - buttonRect.height - EdgePadding;
+
+  let newX = Math.min(Math.max(currentLeft, EdgePadding), MaxLeft);
+  let newY = Math.min(Math.max(currentTop, EdgePadding), MaxTop);
+  if (
+    currentLeft < EdgePadding ||
+    currentTop < EdgePadding ||
+    currentLeft > MaxLeft ||
+    currentTop > MaxTop
+  ) {
+    MuteBtn.style.transition = "all 0.2s ease-out";
+    MuteBtn.style.left = `${newX}px`;
+    MuteBtn.style.top = `${newY}px`;
+  }
+});
+
 document.addEventListener("mousemove", (e) => {
   const buttonRect = MuteBtn.getBoundingClientRect();
   const buttonCenterX = buttonRect.left + buttonRect.width / 2;
@@ -108,9 +134,6 @@ document.addEventListener("mousemove", (e) => {
   // const DistanceToRight = WindowWidth - (buttonRect.left + buttonRect.width);
   // const DistanceToTop = buttonRect.top;
   // const DistanceToBottom = WindowHeight - (buttonRect.top + buttonRect.height);
-
-  const MouseSneak = 80;
-  const EdgePadding = 35;
 
   // VerticalDistance = DistanceToTop + DistanceToBottom - EdgePadding * 2;
   // horiDistance = DistanceToLeft + DistanceToRight - EdgePadding * 2;
