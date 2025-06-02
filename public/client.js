@@ -169,17 +169,29 @@ document.addEventListener("mousemove", (e) => {
 // 2. Handle the "Catch Me!" click event
 MuteBtn.addEventListener("click", () => {
   isMuted = !isMuted; // Toggle the mute state
-  if (isMuted) {
-    console.log("MIC MUTED! (You caught the elusive button! ヾ(≧▽≦*)o)");
-    muteButton.textContent = ":O";
-    // *** Future WebRTC step: Call a function like `toggleWebRtcMute(true)` here ***
+
+  if (localStream) {
+    const UrOwnAudio = localStream.getAudioTracks();
+    // Gets the audio that your computer is recording.
+
+    UrOwnAudio.forEach((track) => {
+      track.enabled = !track.enabled;
+      console.log(`Yipppe! You've enabled your mic! ${track.enabled}`);
+    });
+
+    if (isMuted) {
+      MuteIcon.setAttribute("src", "#");
+      MuteBtn.classList.add("muted");
+    } else {
+      MuteIcon.setAttribute(
+        "src",
+        "https://img.icons8.com/?size=100&id=6THNKcI0GcnT&format=png&color=3958B4"
+      );
+      MuteBtn.classList.remove("muted");
+    }
   } else {
-    console.log("MIC UNMUTED! (Let's make some noise! (b ᵔ▽ᵔ)b)");
-    muteButton.textContent = ":P";
-    // *** Future WebRTC step: Call a function like `toggleWebRtcMute(false)` here ***
+    console.warn("Local stream not available. Cannot toggle mute.");
   }
-  // You could also reset its position to the center after being caught,
-  // or temporarily disable its movement. For now, it just keeps running.
 });
 // #endregion
 
