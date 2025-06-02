@@ -89,16 +89,16 @@ MuteBtn.addEventListener("mouseleave", () => {
 
 //#region Run Away Logic
 
-let WindowWidth = window.innerWidth;
-let WindowHeight = window.innerHeight;
-// Getting the window dimesions so that the buttons
-// know the area in which it can run away to.
+// let WindowWidth = window.innerWidth;
+// let WindowHeight = window.innerHeight;
+// // Getting the window dimesions so that the buttons
+// // know the area in which it can run away to.
 
-window.addEventListener("resize", () => {
-  WindowWidth = window.innerWidth;
-  WindowHeight = window.innerHeight;
-});
-// Resizes the window dimensions.
+// window.addEventListener("resize", () => {
+//   WindowWidth = window.innerWidth;
+//   WindowHeight = window.innerHeight;
+// });
+// // Resizes the window dimensions.
 
 //MuteButton Hitbox
 // const InitialHitBox = MuteBtn.getBoundingClientRect();
@@ -106,9 +106,10 @@ window.addEventListener("resize", () => {
 // const TopHitbox = InitialHitBox.top;
 
 // Initial position of MuteBtn
-MuteBtn.style.position = "fixed";
-MuteBtn.style.left = "0px";
-MuteBtn.style.top = "0px";
+MuteBtn.style.position = "absolute";
+MuteBtn.style.left = "calc(50% - 125px)";
+MuteBtn.style.top = "calc(100vh - 100px)";
+MuteBtn.style.transform = "translate(15px, 10px)";
 
 document.addEventListener("mousemove", (e) => {
   const buttonRect = MuteBtn.getBoundingClientRect();
@@ -118,16 +119,16 @@ document.addEventListener("mousemove", (e) => {
   const mouseX = e.clientX;
   const mouseY = e.clientY;
 
-  const DistanceToLeft = buttonRect.left;
-  const DistanceToRight = WindowWidth - (buttonRect.left + buttonRect.width);
-  const DistanceToTop = buttonRect.top;
-  const DistanceToBottom = WindowHeight - (buttonRect.top + buttonRect.height);
+  // const DistanceToLeft = buttonRect.left;
+  // const DistanceToRight = WindowWidth - (buttonRect.left + buttonRect.width);
+  // const DistanceToTop = buttonRect.top;
+  // const DistanceToBottom = WindowHeight - (buttonRect.top + buttonRect.height);
 
-  const MouseSneak = 90;
+  const MouseSneak = 80;
   const EdgePadding = 35;
 
-  VerticalDistance = DistanceToTop + DistanceToBottom - EdgePadding * 2;
-  horiDistance = DistanceToLeft + DistanceToRight - EdgePadding * 2;
+  // VerticalDistance = DistanceToTop + DistanceToBottom - EdgePadding * 2;
+  // horiDistance = DistanceToLeft + DistanceToRight - EdgePadding * 2;
 
   // the distance between the mouse and the button's center
   const distance = Math.sqrt(
@@ -139,18 +140,21 @@ document.addEventListener("mousemove", (e) => {
     let newY;
 
     for (let i = 0; i < 50; i++) {
-      newX = Math.random() * VerticalDistance;
-      newY = Math.random() * horiDistance;
+      newX =
+        Math.random() *
+        (window.innerWidth - 2 * EdgePadding - buttonRect.width);
+      newY =
+        Math.random() *
+        (window.innerHeight - 2 * EdgePadding - buttonRect.height);
       // Chooses a random position within the window dimensions,
 
       const newDistance = Math.sqrt(
         Math.pow(mouseX - newX, 2) + Math.pow(mouseY - newY, 2)
       );
 
-      if (newDistance > MouseSneak * 12) {
+      if (newDistance > MouseSneak * 9) {
         //Controls how fast the button runs away from the mouse.
         MuteBtn.style.transition = "all 0.3s ease-out";
-        MuteBtn.style.position = "fixed";
         MuteBtn.style.left = `${newX}px`;
         MuteBtn.style.top = `${newY}px`;
         break;
@@ -161,7 +165,24 @@ document.addEventListener("mousemove", (e) => {
 
 //#endregion
 
-// MuteBtn.setAttribute('src', './Asset-1.png');
+// #region AudioMute Logic
+// 2. Handle the "Catch Me!" click event
+MuteBtn.addEventListener("click", () => {
+  isMuted = !isMuted; // Toggle the mute state
+  if (isMuted) {
+    console.log("MIC MUTED! (You caught the elusive button! ヾ(≧▽≦*)o)");
+    muteButton.textContent = ":O";
+    // *** Future WebRTC step: Call a function like `toggleWebRtcMute(true)` here ***
+  } else {
+    console.log("MIC UNMUTED! (Let's make some noise! (b ᵔ▽ᵔ)b)");
+    muteButton.textContent = ":P";
+    // *** Future WebRTC step: Call a function like `toggleWebRtcMute(false)` here ***
+  }
+  // You could also reset its position to the center after being caught,
+  // or temporarily disable its movement. For now, it just keeps running.
+});
+// #endregion
+
 // #endregion
 
 // DOM Elements
