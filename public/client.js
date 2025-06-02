@@ -87,6 +87,80 @@ MuteBtn.addEventListener("mouseleave", () => {
   MuteIcon.height = 35;
 });
 
+//#region Run Away Logic
+
+let WindowWidth = window.innerWidth;
+let WindowHeight = window.innerHeight;
+// Getting the window dimesions so that the buttons
+// know the area in which it can run away to.
+
+window.addEventListener("resize", () => {
+  WindowWidth = window.innerWidth;
+  WindowHeight = window.innerHeight;
+});
+// Resizes the window dimensions.
+
+//MuteButton Hitbox
+// const InitialHitBox = MuteBtn.getBoundingClientRect();
+// const LHitbox = InitialHitBox.left;
+// const TopHitbox = InitialHitBox.top;
+
+// Initial position of MuteBtn
+MuteBtn.style.position = "fixed";
+MuteBtn.style.left = "0px";
+MuteBtn.style.top = "0px";
+
+document.addEventListener("mousemove", (e) => {
+  const buttonRect = MuteBtn.getBoundingClientRect();
+  const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+  const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+
+  const mouseX = e.clientX;
+  const mouseY = e.clientY;
+
+  const DistanceToLeft = buttonRect.left;
+  const DistanceToRight = WindowWidth - (buttonRect.left + buttonRect.width);
+  const DistanceToTop = buttonRect.top;
+  const DistanceToBottom = WindowHeight - (buttonRect.top + buttonRect.height);
+
+  const MouseSneak = 90;
+  const EdgePadding = 35;
+
+  VerticalDistance = DistanceToTop + DistanceToBottom - EdgePadding * 2;
+  horiDistance = DistanceToLeft + DistanceToRight - EdgePadding * 2;
+
+  // the distance between the mouse and the button's center
+  const distance = Math.sqrt(
+    Math.pow(mouseX - buttonCenterX, 2) + Math.pow(mouseY - buttonCenterY, 2)
+  );
+
+  if (distance < MouseSneak) {
+    let newX;
+    let newY;
+
+    for (let i = 0; i < 50; i++) {
+      newX = Math.random() * VerticalDistance;
+      newY = Math.random() * horiDistance;
+      // Chooses a random position within the window dimensions,
+
+      const newDistance = Math.sqrt(
+        Math.pow(mouseX - newX, 2) + Math.pow(mouseY - newY, 2)
+      );
+
+      if (newDistance > MouseSneak * 12) {
+        //Controls how fast the button runs away from the mouse.
+        MuteBtn.style.transition = "all 0.3s ease-out";
+        MuteBtn.style.position = "fixed";
+        MuteBtn.style.left = `${newX}px`;
+        MuteBtn.style.top = `${newY}px`;
+        break;
+      }
+    }
+  }
+});
+
+//#endregion
+
 // MuteBtn.setAttribute('src', './Asset-1.png');
 // #endregion
 
