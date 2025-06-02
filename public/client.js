@@ -300,7 +300,7 @@ CameraBtn.addEventListener("click", () => {
     CameraBtn.classList.remove("off");
     localVideo.classList.add("PixelatedVid");
     CameraIcon.src =
-      "https://img.icons8.com/?size=100&id=6THNKcI0GcnT&format=png&color=3958B4";
+      "https://img.icons8.com/?size=100&id=QccisbQJF3lB&format=png&color=3958B4";
   }
 });
 
