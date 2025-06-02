@@ -107,9 +107,26 @@ video {
 }
 
 .CamBtn.off {
+  background: #ffa591;
 }
 
 .PixelatedVid {
+  width: 160px !important;
+  height: 120px !important;
+
+  transform: scale(5);
+  transform-origin: top left;
+
+  image-rendering: optimizeSpeed; /* For older browsers */
+  image-rendering: -moz-crisp-edges; /* For Firefox */
+  image-rendering: -webkit-optimize-contrast;
+  /* For Webkit (Safari, older Chrome) */
+  image-rendering: pixelated; /* Standard for modern browsers */
+  -ms-interpolation-mode: nearest-neighbor; /* For IE (if applicable) */
+
+  /* Optional: You can combine this with other filters for more glitchiness */
+  filter: blur(0.5px) contrast(120%);
+  filter: grayscale(100%) brightness(1.5);
 }
 
 .CamIcon {

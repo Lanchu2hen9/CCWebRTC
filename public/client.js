@@ -267,6 +267,12 @@ CameraBtn.addEventListener("click", () => {
     return;
   }
 
+  const videoTracks = localStream.getVideoTracks();
+  if (videoTracks.length === 0) {
+    console.warn("No video tracks found in local stream.");
+    return;
+  }
+
   const WebcamVids = localStream.getVideoTracks();
   if (WebcamVids.length === 0) {
     console.warn("No video tracks found in local stream.");
@@ -281,13 +287,20 @@ CameraBtn.addEventListener("click", () => {
     WebcamVid.enabled = false;
     localVideo.classList.remove("PixelatedVid");
     CameraBtn.classList.add("off");
-    CameraIcon.src = "#";
+    CameraIcon.src = "./VideoCall-Hide.png";
 
     alert("🤨 What are you hiding?");
     if (YouSus) {
       YouSus.currentTime = 0;
       YouSus.play().catch((e) => console.warn("Sus audio not playing", e));
     }
+  } else {
+    isCameraOn = true;
+    WebcamVid.enabled = true;
+    CameraBtn.classList.remove("off");
+    localVideo.classList.add("PixelatedVid");
+    CameraIcon.src =
+      "https://img.icons8.com/?size=100&id=6THNKcI0GcnT&format=png&color=3958B4";
   }
 });
 
