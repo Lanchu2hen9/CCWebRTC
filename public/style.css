@@ -76,6 +76,7 @@ video {
 }
 
 .MuteBtn {
+  position: relative;
   margin: 0;
   padding: 5px 5px 6px 5px;
   border: none;
@@ -87,9 +88,13 @@ video {
   background-color: #f9edb0;
 }
 
-. .MuteBtn > img {
+.MuteBtn img {
   position: relative;
   top: 2px;
+}
+
+.MuteBtn:hover {
+  background-color: #ffe665;
 }
 
 .controls button:disabled {

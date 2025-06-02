@@ -68,6 +68,28 @@ NameInput.addEventListener("keypress", (event) => {
 });
 // #endregion
 
+// #region Mute Button Behaviour:
+const MuteBtn = document.querySelector("#MuteButton");
+const MuteIcon = document.querySelector("#MuteIcon");
+
+MuteBtn.addEventListener("mouseenter", () => {
+  MuteIcon.setAttribute("src", "./Asset1b.png");
+  MuteIcon.width = 40;
+  MuteIcon.height = 40;
+});
+
+MuteBtn.addEventListener("mouseleave", () => {
+  MuteIcon.setAttribute(
+    "src",
+    "https://img.icons8.com/?size=100&id=6THNKcI0GcnT&format=png&color=3958B4"
+  );
+  MuteIcon.width = 35;
+  MuteIcon.height = 35;
+});
+
+// MuteBtn.setAttribute('src', './Asset-1.png');
+// #endregion
+
 // DOM Elements
 const localVideo = document.getElementById("localVideo");
 const remoteVideo = document.getElementById("remoteVideo");
