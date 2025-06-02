@@ -233,6 +233,7 @@ MuteBtn.addEventListener("click", () => {
     RunningAudPlaying = false;
     console.log("Stopped running audio.");
   }
+
   // setTimeout(() => {
   //   if (!IsMikeScreaming) {
   //     Scream.play();
