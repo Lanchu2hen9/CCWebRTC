@@ -247,6 +247,49 @@ MuteBtn.addEventListener("click", () => {
   }
 });
 // #endregion
+// #endregion
+
+// #region Cam on/off
+const CameraBtn = document.querySelector("#CamButton");
+const CameraIcon = document.querySelector("#CamIcon");
+const YourWebcamVid = document.querySelector("#localVideo");
+
+const YouSus = document.querySelector("#USus");
+YouSus.volume = 0.3;
+YouSus.loop = false;
+
+let isCameraOn = true;
+let isPixelated = false;
+
+CameraBtn.addEventListener("click", () => {
+  if (!localStream) {
+    console.warn("Local stream not available. Cannot toggle camera.");
+    return;
+  }
+
+  const WebcamVids = localStream.getVideoTracks();
+  if (WebcamVids.length === 0) {
+    console.warn("No video tracks found in local stream.");
+    return;
+  }
+
+  const WebcamVid = videoTracks[0];
+  // Gets the video track from an array-like object of video tracks.
+
+  if (isCameraOn) {
+    isCameraOn = false;
+    WebcamVid.enabled = false;
+    localVideo.classList.remove("PixelatedVid");
+    CameraBtn.classList.add("off");
+    CameraIcon.src = "#";
+
+    alert("🤨 What are you hiding?");
+    if (YouSus) {
+      YouSus.currentTime = 0;
+      YouSus.play().catch((e) => console.warn("Sus audio not playing", e));
+    }
+  }
+});
 
 // #endregion
 

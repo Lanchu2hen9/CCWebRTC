@@ -70,6 +70,7 @@ video {
   cursor: pointer;
   border: none;
   border-radius: 4px;
+  z-index: 5;
 
   color: rgb(57, 88, 180);
   background-color: #f9edb0;
@@ -86,6 +87,34 @@ video {
 
   background-color: #f9edb0;
   z-index: 7;
+}
+
+.CamBtn {
+  margin: 0;
+  padding: 5px 5px 6px 5px;
+  border: none;
+  border-radius: 15px;
+  transition: all 0.3s ease-out;
+  font-size: 1.2rem;
+  cursor: pointer;
+
+  background-color: #f9edb0;
+  z-index: 5;
+}
+
+.CamBtn:hover {
+  background-color: #ffe665;
+}
+
+.CamBtn.off {
+}
+
+.PixelatedVid {
+}
+
+.CamIcon {
+  position: relative;
+  top: 3px;
 }
 
 .MuteBtn img {
