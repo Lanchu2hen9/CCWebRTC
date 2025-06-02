@@ -122,6 +122,17 @@ window.addEventListener("resize", () => {
   }
 });
 
+const RunningAudio = document.querySelector("#RunningAud");
+RunningAudio.volume = 0.3;
+RunningAudio.loop = true;
+
+const Scream = document.querySelector("#MikeScrem");
+Scream.volume = 0.3;
+Scream.loop = false;
+
+let IsMikeScreaming = false;
+let RunningAudPlaying = false;
+
 document.addEventListener("mousemove", (e) => {
   const buttonRect = MuteBtn.getBoundingClientRect();
   const buttonCenterX = buttonRect.left + buttonRect.width / 2;
@@ -146,6 +157,16 @@ document.addEventListener("mousemove", (e) => {
   if (distance < MouseSneak) {
     let newX;
     let newY;
+    if (!RunningAudPlaying) {
+      RunningAudio.play()
+        .then(() => {
+          RunningAudPlaying = true;
+          console.log("Running audio started playing.");
+        })
+        .catch((error) => {
+          console.error("Error playing running audio:", error);
+        });
+    }
 
     for (let i = 0; i < 50; i++) {
       newX =
@@ -167,6 +188,12 @@ document.addEventListener("mousemove", (e) => {
         MuteBtn.style.top = `${newY}px`;
         break;
       }
+    }
+  } else {
+    if (RunningAudPlaying) {
+      RunningAudio.pause();
+      RunningAudPlaying = false;
+      console.log("Stopped running audio.");
     }
   }
 });
@@ -199,6 +226,23 @@ MuteBtn.addEventListener("click", () => {
     }
   } else {
     console.warn("Local stream not available. Cannot toggle mute.");
+  }
+
+  if (RunningAudPlaying) {
+    RunningAudio.pause();
+    RunningAudPlaying = false;
+    console.log("Stopped running audio.");
+  }
+  // setTimeout(() => {
+  //   if (!IsMikeScreaming) {
+  //     Scream.play();
+  //     IsMikeScreaming = true;
+  //   }
+  // }, 100);
+
+  if (!IsMikeScreaming) {
+    Scream.play();
+    IsMikeScreaming = true;
   }
 });
 // #endregion
