@@ -63,28 +63,33 @@ video {
   margin-bottom: 20px;
 }
 
-.controls button {
+.hangupButton {
   padding: 10px 20px;
   margin: 0 10px;
   font-size: 1rem;
   cursor: pointer;
   border: none;
   border-radius: 4px;
-  background-color: #007bff;
-  color: white;
+
+  color: rgb(57, 88, 180);
+  background-color: #f9edb0;
 }
 
 .MuteBtn {
+  margin: 0;
+  padding: 5px 5px 6px 5px;
+  border: none;
+  border-radius: 15px;
   transition: all 0.3s ease-out;
-  padding: 10px 10px;
   font-size: 1.2rem;
   cursor: pointer;
+
+  background-color: #f9edb0;
 }
 
-.MuteBtn img {
-  display: block;
-  margin: 0;
-  padding: 0%;
+. .MuteBtn > img {
+  position: relative;
+  top: 2px;
 }
 
 .controls button:disabled {
