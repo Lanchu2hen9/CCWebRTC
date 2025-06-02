@@ -72,21 +72,6 @@ NameInput.addEventListener("keypress", (event) => {
 const MuteBtn = document.querySelector("#MuteButton");
 const MuteIcon = document.querySelector("#MuteIcon");
 
-MuteBtn.addEventListener("mouseenter", () => {
-  MuteIcon.setAttribute("src", "./Asset1b.png");
-  MuteIcon.width = 40;
-  MuteIcon.height = 40;
-});
-
-MuteBtn.addEventListener("mouseleave", () => {
-  MuteIcon.setAttribute(
-    "src",
-    "https://img.icons8.com/?size=100&id=6THNKcI0GcnT&format=png&color=3958B4"
-  );
-  MuteIcon.width = 35;
-  MuteIcon.height = 35;
-});
-
 //#region Run Away Logic
 
 // let WindowWidth = window.innerWidth;
@@ -165,6 +150,7 @@ document.addEventListener("mousemove", (e) => {
 
 //#endregion
 
+isMuted = false; // Global variable to track mute state
 // #region AudioMute Logic
 // 2. Handle the "Catch Me!" click event
 MuteBtn.addEventListener("click", () => {
@@ -178,9 +164,8 @@ MuteBtn.addEventListener("click", () => {
       track.enabled = !track.enabled;
       console.log(`Yipppe! You've enabled your mic! ${track.enabled}`);
     });
-
     if (isMuted) {
-      MuteIcon.setAttribute("src", "#");
+      MuteIcon.setAttribute("src", "./CancelledShockedMike.png");
       MuteBtn.classList.add("muted");
     } else {
       MuteIcon.setAttribute(
