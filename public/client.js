@@ -299,6 +299,12 @@ CameraBtn.addEventListener("click", () => {
     WebcamVid.enabled = true;
     CameraBtn.classList.remove("off");
     localVideo.classList.add("PixelatedVid");
+
+    setInterval(() => {
+      ctx.drawImage(localVideo, 0, 0, cnv.width, cnv.height);
+      PixelateWebcamVideo();
+    }, 1000 / 30);
+
     CameraIcon.src =
       "https://img.icons8.com/?size=100&id=QccisbQJF3lB&format=png&color=3958B4";
   }
@@ -310,7 +316,7 @@ CameraBtn.addEventListener("click", () => {
 // First things first, get the video element.
 const VideoElement = document.querySelector("#localVideo");
 // Then get the canvas itself to draw the downsized video onto it.
-const cnv = document.getElementById(`cnv_element`);
+const cnv = document.querySelector("#cnv_element");
 const ctx = cnv.getContext(`2d`);
 
 // Function to pixelate the video:
@@ -363,7 +369,7 @@ function PixelateWebcamVideo() {
 
       for (let dy = 0; dy < PixelSize && y + dy < cnv.height; dy++) {
         for (let dx = 0; dx < PixelSize && x + dx < cnv.width; dx++) {
-          const index = ((y + dy) * canvas.width + (x + dx)) * 4;
+          const index = ((y + dy) * cnv.width + (x + dx)) * 4;
           PixelatedVid[index] = r;
           PixelatedVid[index + 1] = g;
           PixelatedVid[index + 2] = b;
@@ -376,7 +382,7 @@ function PixelateWebcamVideo() {
   ctx.putImageData(PixelatedImageData, 0, 0);
 }
 
-setInterval(PixelateWebcamVideo, 1000 / 30);
+// setInterval(PixelateWebcamVideo(), 1000 / 30);
 
 // #endregion
 
