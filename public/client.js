@@ -265,16 +265,34 @@ let isPixelated = false;
 // User Clicks => isPixelated false ==> User Clicks again ==> isPixalated true
 
 CameraBtn.addEventListener("click", () => {
-  if (isCameraOn) {
+  const videoTracks = localStream.getVideoTracks();
+  const videoTrack = videoTracks[0];
+
+  if (isCameraOn === true) {
     isCameraOn = false;
     // Turns off the camera.
+  } else {
+    isCameraOn = true;
+  }
+
+  if (!isCameraOn) {
+    videoTrack.enabled = false;
+    // Turns off the video track of the webcam.
+
     // isPixelated = false;
 
     CameraBtn.classList.add("off");
     CameraIcon.src = "./VideoCall-Hide.png";
+    alert("🤨 What are you hiding?");
+    if (YouSus) {
+      YouSus.currentTime = 0;
+      YouSus.play().catch((e) => console.warn("Sus audio not playing", e));
+    }
   } else {
-    isCameraOn = true;
+    videoTrack.enabled = true;
     // Turns on the camera.
+
+    // INSERT MAXIMUM PIXELATION HERE!!!!!
     // isPixelated = true;
     CameraBtn.classList.remove("off");
     CameraIcon.src =
