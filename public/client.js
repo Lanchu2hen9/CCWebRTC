@@ -335,9 +335,48 @@ function PixelateWebcamVideo() {
   // until it reaches the limit height of the canvas.
   for (let y = 0; y < cnv.height; y += PixelSize) {
     // Samething but instead of y, its the x-coordinate now.
-    for (let x = 0; x < cnv.width; x += PixelSize) {}
+    for (let x = 0; x < cnv.width; x += PixelSize) {
+      let r = 0;
+      let g = 0;
+      let b = 0;
+      let alpha = 0;
+      let count = 0;
+
+      for (let dy = 0; dy < PixelSize && y + dy < cnv.height; dy++) {
+        // scans each row in the "PixelSize by PixelSize" grid.
+
+        for (let dx = 0; dx < PixelSize && x + dx < cnv.width; dx++) {
+          // scans each column in the "PixelSize by PixelSize" grid.
+
+          const index = ((y + dy) * cnv.width + (x + dx)) * 4;
+          // The current index in the "PixelSize" unit y down
+          // + dy times the width of the whole ass canvas
+          // + the "PixelSize" unit y across + dx.
+
+          r += RawPixelData[index];
+          g += RawPixelData[index + 1];
+          b += RawPixelData[index + 2];
+          alpha += RawPixelData[index + 3];
+          count++;
+        }
+      }
+
+      for (let dy = 0; dy < PixelSize && y + dy < cnv.height; dy++) {
+        for (let dx = 0; dx < PixelSize && x + dx < cnv.width; dx++) {
+          const index = ((y + dy) * canvas.width + (x + dx)) * 4;
+          PixelatedVid[index] = r;
+          PixelatedVid[index + 1] = g;
+          PixelatedVid[index + 2] = b;
+          PixelatedVid[index + 3] = alpha;
+        }
+      }
+    }
   }
+  const PixelatedImageData = new ImageData(PixelatedVid, cnv.width, cnv.height);
+  ctx.putImageData(PixelatedImageData, 0, 0);
 }
+
+setInterval(PixelateWebcamVideo, 1000 / 30);
 
 // #endregion
 
