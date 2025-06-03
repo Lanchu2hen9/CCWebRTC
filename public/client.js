@@ -303,6 +303,41 @@ CameraBtn.addEventListener("click", () => {
       "https://img.icons8.com/?size=100&id=QccisbQJF3lB&format=png&color=3958B4";
   }
 });
+// #endregion
+
+// #region Pixelate Video
+
+// First things first, get the video element.
+const VideoElement = document.querySelector("#localVideo");
+// Then get the canvas itself to draw the downsized video onto it.
+const cnv = document.getElementById(`cnv_element`);
+const ctx = cnv.getContext(`2d`);
+
+// Function to pixelate the video:
+
+function PixelateWebcamVideo() {
+  const VidImageData = ctx.getImageData(0, 0, cnv.width, cnv.height);
+  // Gets the image data from the top-left corner of the canvas to the
+  // width and height of the canvas.
+
+  const RawPixelData = VidImageData.data;
+  // Grabs the pixel data from the individual frame of the video, and
+  // turns it into useable data for the rest of the code to process.
+
+  const PixelatedVid = new Uint8ClampedArray(RawPixelData.length);
+  // Creates a new array-like object to store the "cooked" freshly
+  // video data.
+
+  const PixelSize = 10; // ✨🌈Taste the Pixels! 🌈 ✨
+
+  // Outside for loop, telling the code to iterate by "PixelSize unit" through
+  // the y bit of `.getImageData(0, y, cnv.width, cnv.height);`
+  // until it reaches the limit height of the canvas.
+  for (let y = 0; y < cnv.height; y += PixelSize) {
+    // Samething but instead of y, its the x-coordinate now.
+    for (let x = 0; x < cnv.width; x += PixelSize) {}
+  }
+}
 
 // #endregion
 
