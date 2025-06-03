@@ -306,6 +306,13 @@ MuteBtn.addEventListener("click", () => {
 
 // User clicks => Camera turns off => User Clicks again => Camera turns on => Pixelated Video streams.
 // User Clicks => isPixelated false ==> User Clicks again ==> isPixalated true
+function PixelateAnimation() {
+  if (isPixelated) {
+    ctx.drawImage(PixelateWebcamVideo(), 0, 0, cnv.width, cnv.height);
+    PixelateWebcamVideo();
+    requestAnimationFrame(PixelateAnimation);
+  }
+}
 
 CameraBtn.addEventListener("click", () => {
   const videoTracks = localStream.getVideoTracks();
@@ -323,6 +330,8 @@ CameraBtn.addEventListener("click", () => {
     // Turns off the video track of the webcam.
 
     isPixelated = false;
+    // const WebcamVid = videoTracks[0];
+    // WebcamVid.enabled = false;
 
     CameraBtn.classList.add("off");
     CameraIcon.src = "./VideoCall-Hide.png";
@@ -340,16 +349,29 @@ CameraBtn.addEventListener("click", () => {
       cnv.height = localVideo.videoHeight;
     });
 
+    // cnv.width = localVideo.videoWidth;
+    // cnv.height = localVideo.videoHeight;
+
+    // localVideo.onloadedmetadata = () => {
+    //   cnv.width = localVideo.videoWidth;
+    //   cnv.height = localVideo.videoHeight;
+    //   localVideo.style.display = "none";
+    //   cnv.style.display = "block";
+    //   isPixelated = true;
+    //   PixelateAnimation();
+    // };
+
+    // if (localVideo.readyState >= 2) {
+    //   cnv.width = localVideo.videoWidth;
+    //   cnv.height = localVideo.videoHeight;
+    //   localVideo.style.display = "none";
+    //   cnv.style.display = "block";
+    //   isPixelated = true;
+    //   PixelateAnimation();
+    // }
+
     localVideo.style.display = "none";
     cnv.style.display = "block";
-
-    function PixelateAnimation() {
-      if (isPixelated) {
-        ctx.drawImage(localVideo, 0, 0, cnv.width, cnv.height);
-        PixelateWebcamVideo();
-        requestAnimationFrame(PixelateAnimation);
-      }
-    }
     isPixelated = true;
     PixelateAnimation();
 
@@ -358,50 +380,6 @@ CameraBtn.addEventListener("click", () => {
       "https://img.icons8.com/?size=100&id=QccisbQJF3lB&format=png&color=3958B4";
   }
 });
-
-// CameraBtn.addEventListener("click", () => {
-//   if (!localStream) {
-//     console.warn("Local stream not available. Cannot toggle camera.");
-//     return;
-//   }
-
-//   const videoTracks = localStream.getVideoTracks();
-//   if (videoTracks.length === 0) {
-//     console.warn("No video tracks found in local stream.");
-//     return;
-//   }
-
-//   c  if (WebcamVids.length === 0) {
-//     console.warn("No video tracks found in local stream.");
-//     return;
-//   }
-
-//   const WebcamVid = videoTracks[0];
-
-//   // Gets the video track from an array-like object of video tracks.
-
-//   if (isCameraOn) {
-//     isCameraOn = false;
-//     WebcamVid.enabled = false;
-//     localVideo.classList.remove("PixelatedVid");
-
-//     alert("🤨 What are you hiding?");
-//     if (YouSus) {
-//       YouSus.currentTime = 0;
-//       YouSus.play().catch((e) => console.warn("Sus audio not playing", e));
-//     }
-//   } else {
-//     isCameraOn = true;
-//     WebcamVid.enabled = true;
-//     localVideo.classList.add("PixelatedVid");
-
-//     requestAnimationFrame(() => {
-//       if (!isPixelated) ctx.drawImage(localVideo, 0, 0, cnv.width, cnv.height);
-//       else PixelateWebcamVideo();
-//     });
-//   }
-// });
-// #endregion
 
 // #region Pixelate Video
 
