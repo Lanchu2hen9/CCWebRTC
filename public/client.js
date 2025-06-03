@@ -261,128 +261,141 @@ YouSus.loop = false;
 let isCameraOn = true;
 let isPixelated = false;
 
+// User clicks => Camera turns off => User Clicks again => Camera turns on => Pixelated Video streams.
+// User Clicks => isPixelated false ==> User Clicks again ==> isPixalated true
+
 CameraBtn.addEventListener("click", () => {
-  if (!localStream) {
-    console.warn("Local stream not available. Cannot toggle camera.");
-    return;
-  }
-
-  const videoTracks = localStream.getVideoTracks();
-  if (videoTracks.length === 0) {
-    console.warn("No video tracks found in local stream.");
-    return;
-  }
-
-  const WebcamVids = localStream.getVideoTracks();
-  if (WebcamVids.length === 0) {
-    console.warn("No video tracks found in local stream.");
-    return;
-  }
-
-  const WebcamVid = videoTracks[0];
-  // Gets the video track from an array-like object of video tracks.
-
   if (isCameraOn) {
     isCameraOn = false;
-    WebcamVid.enabled = false;
-    localVideo.classList.remove("PixelatedVid");
+    // Turns off the camera.
+    // isPixelated = false;
+
     CameraBtn.classList.add("off");
     CameraIcon.src = "./VideoCall-Hide.png";
-
-    alert("🤨 What are you hiding?");
-    if (YouSus) {
-      YouSus.currentTime = 0;
-      YouSus.play().catch((e) => console.warn("Sus audio not playing", e));
-    }
   } else {
     isCameraOn = true;
-    WebcamVid.enabled = true;
+    // Turns on the camera.
+    // isPixelated = true;
     CameraBtn.classList.remove("off");
-    localVideo.classList.add("PixelatedVid");
-
-    setInterval(() => {
-      ctx.drawImage(localVideo, 0, 0, cnv.width, cnv.height);
-      PixelateWebcamVideo();
-    }, 1000 / 30);
-
     CameraIcon.src =
       "https://img.icons8.com/?size=100&id=QccisbQJF3lB&format=png&color=3958B4";
   }
 });
+
+// CameraBtn.addEventListener("click", () => {
+//   if (!localStream) {
+//     console.warn("Local stream not available. Cannot toggle camera.");
+//     return;
+//   }
+
+//   const videoTracks = localStream.getVideoTracks();
+//   if (videoTracks.length === 0) {
+//     console.warn("No video tracks found in local stream.");
+//     return;
+//   }
+
+//   c  if (WebcamVids.length === 0) {
+//     console.warn("No video tracks found in local stream.");
+//     return;
+//   }
+
+//   const WebcamVid = videoTracks[0];
+
+//   // Gets the video track from an array-like object of video tracks.
+
+//   if (isCameraOn) {
+//     isCameraOn = false;
+//     WebcamVid.enabled = false;
+//     localVideo.classList.remove("PixelatedVid");
+
+//     alert("🤨 What are you hiding?");
+//     if (YouSus) {
+//       YouSus.currentTime = 0;
+//       YouSus.play().catch((e) => console.warn("Sus audio not playing", e));
+//     }
+//   } else {
+//     isCameraOn = true;
+//     WebcamVid.enabled = true;
+//     localVideo.classList.add("PixelatedVid");
+
+//     requestAnimationFrame(() => {
+//       if (!isPixelated) ctx.drawImage(localVideo, 0, 0, cnv.width, cnv.height);
+//       else PixelateWebcamVideo();
+//     });
+//   }
+// });
 // #endregion
 
 // #region Pixelate Video
 
-// First things first, get the video element.
-const VideoElement = document.querySelector("#localVideo");
-// Then get the canvas itself to draw the downsized video onto it.
-const cnv = document.querySelector("#cnv_element");
-const ctx = cnv.getContext(`2d`);
+// // First things first, get the video element.
+// const VideoElement = document.querySelector("#localVideo");
+// // Then get the canvas itself to draw the downsized video onto it.
+// const cnv = document.querySelector("#cnv_element");
+// const ctx = cnv.getContext(`2d`);
 
 // Function to pixelate the video:
 
-function PixelateWebcamVideo() {
-  const VidImageData = ctx.getImageData(0, 0, cnv.width, cnv.height);
-  // Gets the image data from the top-left corner of the canvas to the
-  // width and height of the canvas.
+// function PixelateWebcamVideo() {
+//   const VidImageData = ctx.getImageData(0, 0, cnv.width, cnv.height);
+//   // Gets the image data from the top-left corner of the canvas to the
+//   // width and height of the canvas.
 
-  const RawPixelData = VidImageData.data;
-  // Grabs the pixel data from the individual frame of the video, and
-  // turns it into useable data for the rest of the code to process.
+//   const RawPixelData = VidImageData.data;
+//   // Grabs the pixel data from the individual frame of the video, and
+//   // turns it into useable data for the rest of the code to process.
 
-  const PixelatedVid = new Uint8ClampedArray(RawPixelData.length);
-  // Creates a new array-like object to store the "cooked" freshly
-  // video data.
+//   const PixelatedVid = new Uint8ClampedArray(RawPixelData.length);
+//   // Creates a new array-like object to store the "cooked" freshly
+//   // video data.
 
-  const PixelSize = 10; // ✨🌈Taste the Pixels! 🌈 ✨
+//   const PixelSize = 10; // ✨🌈Taste the Pixels! 🌈 ✨
 
-  // Outside for loop, telling the code to iterate by "PixelSize unit" through
-  // the y bit of `.getImageData(0, y, cnv.width, cnv.height);`
-  // until it reaches the limit height of the canvas.
-  for (let y = 0; y < cnv.height; y += PixelSize) {
-    // Samething but instead of y, its the x-coordinate now.
-    for (let x = 0; x < cnv.width; x += PixelSize) {
-      let r = 0;
-      let g = 0;
-      let b = 0;
-      let alpha = 0;
-      let count = 0;
+//   // Outside for loop, telling the code to iterate by "PixelSize unit" through
+//   // the y bit of `.getImageData(0, y, cnv.width, cnv.height);`
+//   // until it reaches the limit height of the canvas.
+//   for (let y = 0; y < cnv.height; y += PixelSize) {
+//     // Samething but instead of y, its the x-coordinate now.
+//     for (let x = 0; x < cnv.width; x += PixelSize) {
+//       let r = 0;
+//       let g = 0;
+//       let b = 0;
+//       let alpha = 0;
+//       let count = 0;
 
-      for (let dy = 0; dy < PixelSize && y + dy < cnv.height; dy++) {
-        // scans each row in the "PixelSize by PixelSize" grid.
+//       for (let dy = 0; dy < PixelSize && y + dy < cnv.height; dy++) {
+//         // scans each row in the "PixelSize by PixelSize" grid.
 
-        for (let dx = 0; dx < PixelSize && x + dx < cnv.width; dx++) {
-          // scans each column in the "PixelSize by PixelSize" grid.
+//         for (let dx = 0; dx < PixelSize && x + dx < cnv.width; dx++) {
+//           // scans each column in the "PixelSize by PixelSize" grid.
 
-          const index = ((y + dy) * cnv.width + (x + dx)) * 4;
-          // The current index in the "PixelSize" unit y down
-          // + dy times the width of the whole ass canvas
-          // + the "PixelSize" unit y across + dx.
+//           const index = ((y + dy) * cnv.width + (x + dx)) * 4;
+//           // The current index in the "PixelSize" unit y down
+//           // + dy times the width of the whole ass canvas
+//           // + the "PixelSize" unit y across + dx.
 
-          r += RawPixelData[index];
-          g += RawPixelData[index + 1];
-          b += RawPixelData[index + 2];
-          alpha += RawPixelData[index + 3];
-          count++;
-        }
-      }
+//           r += RawPixelData[index];
+//           g += RawPixelData[index + 1];
+//           b += RawPixelData[index + 2];
+//           alpha += RawPixelData[index + 3];
+//           count++;
+//         }
+//       }
 
-      for (let dy = 0; dy < PixelSize && y + dy < cnv.height; dy++) {
-        for (let dx = 0; dx < PixelSize && x + dx < cnv.width; dx++) {
-          const index = ((y + dy) * cnv.width + (x + dx)) * 4;
-          PixelatedVid[index] = r;
-          PixelatedVid[index + 1] = g;
-          PixelatedVid[index + 2] = b;
-          PixelatedVid[index + 3] = alpha;
-        }
-      }
-    }
-  }
-  const PixelatedImageData = new ImageData(PixelatedVid, cnv.width, cnv.height);
-  ctx.putImageData(PixelatedImageData, 0, 0);
-}
-
-// setInterval(PixelateWebcamVideo(), 1000 / 30);
+//       for (let dy = 0; dy < PixelSize && y + dy < cnv.height; dy++) {
+//         for (let dx = 0; dx < PixelSize && x + dx < cnv.width; dx++) {
+//           const index = ((y + dy) * cnv.width + (x + dx)) * 4;
+//           PixelatedVid[index] = r;
+//           PixelatedVid[index + 1] = g;
+//           PixelatedVid[index + 2] = b;
+//           PixelatedVid[index + 3] = alpha;
+//         }
+//       }
+//     }
+//   }
+//   const PixelatedImageData = new ImageData(PixelatedVid, cnv.width, cnv.height);
+//   ctx.putImageData(PixelatedImageData, 0, 0);
+// } const WebcamVids = localStream.getVideoTracks();
 
 // #endregion
 
