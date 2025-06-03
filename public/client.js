@@ -1,10 +1,81 @@
-// #region Start Section
+// #region Global
+// Global ICE configuration, starts with a fallback
+let iceConfiguration = {
+  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+};
+
+//#region StartVars
+const startButton = document.getElementById("startButton");
 const StartSection = document.querySelector("#StartSection");
 const NameInput = document.querySelector("#NameInput");
 const StartButton = document.querySelector("#startButton");
 const Loading = document.querySelector("#Loading");
 
 let userName = "";
+//#endregion
+
+//#region VideoVars
+const localVideo = document.getElementById("localVideo");
+const VideoElement = document.querySelector("#localVideo");
+const remoteVideo = document.getElementById("remoteVideo");
+let localStream;
+let remoteStream;
+let peerConnection;
+let dataChannel;
+let isInitiator = false;
+//#endregion
+
+//#region Audio Vars
+const RunningAudio = document.querySelector("#RunningAud");
+RunningAudio.volume = 0.3;
+RunningAudio.loop = true;
+
+const Scream = document.querySelector("#MikeScrem");
+Scream.volume = 0.3;
+Scream.loop = false;
+
+const YouSus = document.querySelector("#USus");
+YouSus.volume = 0.3;
+YouSus.loop = false;
+
+//#region RunningBtn
+const MouseSneak = 80;
+const EdgePadding = 35;
+//#endregion
+//#endregion
+
+//#region Call Int Vars
+const hangupButton = document.getElementById("hangupButton");
+const chatLog = document.getElementById("chatLog");
+const chatInput = document.getElementById("chatInput");
+const sendButton = document.getElementById("sendButton");
+
+const CameraBtn = document.querySelector("#CamButton");
+const CameraIcon = document.querySelector("#CamIcon");
+
+const MuteBtn = document.querySelector("#MuteButton");
+const MuteIcon = document.querySelector("#MuteIcon");
+//#endregion
+
+//#region Cnv Vars
+// This is for the pixelate video effect.
+
+const cnv = document.querySelector("#cnv_element");
+const ctx = cnv.getContext(`2d`);
+//#endregion
+
+//#region Bool Vars
+let isMuted = false;
+let isCameraOn = true;
+let isPixelated = false;
+let IsMikeScreaming = false;
+let RunningAudPlaying = false;
+//#endregion
+const ROOM_ID = "default-room"; // Simple room ID for Deno KV signaling
+
+// #endregion
+
+// #region Start Section
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelector(".video-container").style.display = "none";
   document.querySelector(".controls").style.displahy = "none";
@@ -69,8 +140,6 @@ NameInput.addEventListener("keypress", (event) => {
 // #endregion
 
 // #region Mute Button Behaviour:
-const MuteBtn = document.querySelector("#MuteButton");
-const MuteIcon = document.querySelector("#MuteIcon");
 
 //#region Run Away Logic
 
@@ -96,9 +165,6 @@ MuteBtn.style.left = "calc(50% - 125px)";
 MuteBtn.style.top = "calc(100vh - 100px)";
 MuteBtn.style.transform = "translate(15px, 10px)";
 
-const MouseSneak = 80;
-const EdgePadding = 35;
-
 window.addEventListener("resize", () => {
   const buttonRect = MuteBtn.getBoundingClientRect();
 
@@ -121,17 +187,6 @@ window.addEventListener("resize", () => {
     MuteBtn.style.top = `${newY}px`;
   }
 });
-
-const RunningAudio = document.querySelector("#RunningAud");
-RunningAudio.volume = 0.3;
-RunningAudio.loop = true;
-
-const Scream = document.querySelector("#MikeScrem");
-Scream.volume = 0.3;
-Scream.loop = false;
-
-let IsMikeScreaming = false;
-let RunningAudPlaying = false;
 
 document.addEventListener("mousemove", (e) => {
   const buttonRect = MuteBtn.getBoundingClientRect();
@@ -199,8 +254,6 @@ document.addEventListener("mousemove", (e) => {
 });
 
 //#endregion
-
-isMuted = false; // Global variable to track mute state
 // #region AudioMute Logic
 // 2. Handle the "Catch Me!" click event
 MuteBtn.addEventListener("click", () => {
@@ -250,24 +303,14 @@ MuteBtn.addEventListener("click", () => {
 // #endregion
 
 // #region Cam on/off
-const CameraBtn = document.querySelector("#CamButton");
-const CameraIcon = document.querySelector("#CamIcon");
-const YourWebcamVid = document.querySelector("#localVideo");
-
-const YouSus = document.querySelector("#USus");
-YouSus.volume = 0.3;
-YouSus.loop = false;
-
-let isCameraOn = true;
-let isPixelated = false;
 
 // User clicks => Camera turns off => User Clicks again => Camera turns on => Pixelated Video streams.
 // User Clicks => isPixelated false ==> User Clicks again ==> isPixalated true
 
 CameraBtn.addEventListener("click", () => {
   const videoTracks = localStream.getVideoTracks();
-  const videoTrack = videoTracks[0];
 
+  const videoTrack = videoTracks[0];
   if (isCameraOn === true) {
     isCameraOn = false;
     // Turns off the camera.
@@ -279,7 +322,7 @@ CameraBtn.addEventListener("click", () => {
     videoTrack.enabled = false;
     // Turns off the video track of the webcam.
 
-    // isPixelated = false;
+    isPixelated = false;
 
     CameraBtn.classList.add("off");
     CameraIcon.src = "./VideoCall-Hide.png";
@@ -292,8 +335,24 @@ CameraBtn.addEventListener("click", () => {
     videoTrack.enabled = true;
     // Turns on the camera.
 
-    // INSERT MAXIMUM PIXELATION HERE!!!!!
-    // isPixelated = true;
+    localVideo.addEventListener("loadedmetadata", () => {
+      cnv.width = localVideo.videoWidth;
+      cnv.height = localVideo.videoHeight;
+    });
+
+    localVideo.style.display = "none";
+    cnv.style.display = "block";
+
+    function PixelateAnimation() {
+      if (isPixelated) {
+        ctx.drawImage(localVideo, 0, 0, cnv.width, cnv.height);
+        PixelateWebcamVideo();
+        requestAnimationFrame(PixelateAnimation);
+      }
+    }
+    isPixelated = true;
+    PixelateAnimation();
+
     CameraBtn.classList.remove("off");
     CameraIcon.src =
       "https://img.icons8.com/?size=100&id=QccisbQJF3lB&format=png&color=3958B4";
@@ -346,98 +405,73 @@ CameraBtn.addEventListener("click", () => {
 
 // #region Pixelate Video
 
-// // First things first, get the video element.
-// const VideoElement = document.querySelector("#localVideo");
-// // Then get the canvas itself to draw the downsized video onto it.
-// const cnv = document.querySelector("#cnv_element");
-// const ctx = cnv.getContext(`2d`);
-
 // Function to pixelate the video:
 
-// function PixelateWebcamVideo() {
-//   const VidImageData = ctx.getImageData(0, 0, cnv.width, cnv.height);
-//   // Gets the image data from the top-left corner of the canvas to the
-//   // width and height of the canvas.
+function PixelateWebcamVideo() {
+  const VidImageData = ctx.getImageData(0, 0, cnv.width, cnv.height);
+  // Gets the image data from the top-left corner of the canvas to the
+  // width and height of the canvas.
 
-//   const RawPixelData = VidImageData.data;
-//   // Grabs the pixel data from the individual frame of the video, and
-//   // turns it into useable data for the rest of the code to process.
+  const RawPixelData = VidImageData.data;
+  // Grabs the pixel data from the individual frame of the video, and
+  // turns it into useable data for the rest of the code to process.
 
-//   const PixelatedVid = new Uint8ClampedArray(RawPixelData.length);
-//   // Creates a new array-like object to store the "cooked" freshly
-//   // video data.
+  const PixelatedVid = new Uint8ClampedArray(RawPixelData.length);
+  // Creates a new array-like object to store the "cooked" freshly
+  // video data.
 
-//   const PixelSize = 10; // ✨🌈Taste the Pixels! 🌈 ✨
+  const PixelSize = 10; // ✨🌈Taste the Pixels! 🌈 ✨
 
-//   // Outside for loop, telling the code to iterate by "PixelSize unit" through
-//   // the y bit of `.getImageData(0, y, cnv.width, cnv.height);`
-//   // until it reaches the limit height of the canvas.
-//   for (let y = 0; y < cnv.height; y += PixelSize) {
-//     // Samething but instead of y, its the x-coordinate now.
-//     for (let x = 0; x < cnv.width; x += PixelSize) {
-//       let r = 0;
-//       let g = 0;
-//       let b = 0;
-//       let alpha = 0;
-//       let count = 0;
+  // Outside for loop, telling the code to iterate by "PixelSize unit" through
+  // the y bit of `.getImageData(0, y, cnv.width, cnv.height);`
+  // until it reaches the limit height of the canvas.
+  for (let y = 0; y < cnv.height; y += PixelSize) {
+    // Samething but instead of y, its the x-coordinate now.
+    for (let x = 0; x < cnv.width; x += PixelSize) {
+      let r = 0;
+      let g = 0;
+      let b = 0;
+      let alpha = 0;
+      let count = 0;
 
-//       for (let dy = 0; dy < PixelSize && y + dy < cnv.height; dy++) {
-//         // scans each row in the "PixelSize by PixelSize" grid.
+      for (let dy = 0; dy < PixelSize && y + dy < cnv.height; dy++) {
+        // scans each row in the "PixelSize by PixelSize" grid.
 
-//         for (let dx = 0; dx < PixelSize && x + dx < cnv.width; dx++) {
-//           // scans each column in the "PixelSize by PixelSize" grid.
+        for (let dx = 0; dx < PixelSize && x + dx < cnv.width; dx++) {
+          // scans each column in the "PixelSize by PixelSize" grid.
 
-//           const index = ((y + dy) * cnv.width + (x + dx)) * 4;
-//           // The current index in the "PixelSize" unit y down
-//           // + dy times the width of the whole ass canvas
-//           // + the "PixelSize" unit y across + dx.
+          const index = ((y + dy) * cnv.width + (x + dx)) * 4;
+          // The current index in the "PixelSize" unit y down
+          // + dy times the width of the whole ass canvas
+          // + the "PixelSize" unit y across + dx.
 
-//           r += RawPixelData[index];
-//           g += RawPixelData[index + 1];
-//           b += RawPixelData[index + 2];
-//           alpha += RawPixelData[index + 3];
-//           count++;
-//         }
-//       }
+          r += RawPixelData[index];
+          g += RawPixelData[index + 1];
+          b += RawPixelData[index + 2];
+          alpha += RawPixelData[index + 3];
+          count++;
+        }
+      }
 
-//       for (let dy = 0; dy < PixelSize && y + dy < cnv.height; dy++) {
-//         for (let dx = 0; dx < PixelSize && x + dx < cnv.width; dx++) {
-//           const index = ((y + dy) * cnv.width + (x + dx)) * 4;
-//           PixelatedVid[index] = r;
-//           PixelatedVid[index + 1] = g;
-//           PixelatedVid[index + 2] = b;
-//           PixelatedVid[index + 3] = alpha;
-//         }
-//       }
-//     }
-//   }
-//   const PixelatedImageData = new ImageData(PixelatedVid, cnv.width, cnv.height);
-//   ctx.putImageData(PixelatedImageData, 0, 0);
-// } const WebcamVids = localStream.getVideoTracks();
+      for (let dy = 0; dy < PixelSize && y + dy < cnv.height; dy++) {
+        for (let dx = 0; dx < PixelSize && x + dx < cnv.width; dx++) {
+          const index = ((y + dy) * cnv.width + (x + dx)) * 4;
+          PixelatedVid[index] = r;
+          PixelatedVid[index + 1] = g;
+          PixelatedVid[index + 2] = b;
+          PixelatedVid[index + 3] = alpha;
+        }
+      }
+    }
+  }
+  const PixelatedImageData = new ImageData(PixelatedVid, cnv.width, cnv.height);
+  ctx.putImageData(PixelatedImageData, 0, 0);
+}
+const WebcamVids = localStream.getVideoTracks();
 
 // #endregion
 
 // DOM Elements
-const localVideo = document.getElementById("localVideo");
-const remoteVideo = document.getElementById("remoteVideo");
-const startButton = document.getElementById("startButton");
-const hangupButton = document.getElementById("hangupButton");
-const chatLog = document.getElementById("chatLog");
-const chatInput = document.getElementById("chatInput");
-const sendButton = document.getElementById("sendButton");
-
-let localStream;
-let remoteStream;
-let peerConnection;
-let dataChannel;
-let isInitiator = false;
-
-const ROOM_ID = "default-room"; // Simple room ID for Deno KV signaling
-
-// Global ICE configuration, starts with a fallback
-let iceConfiguration = {
-  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-};
 
 // --- Fetch ICE Servers ---
 async function fetchIceServers() {

@@ -58,6 +58,15 @@ video {
   border-radius: 7px;
 }
 
+.VideoboxCanvas {
+  width: 100%;
+  height: calc(90%);
+  object-fit: cover;
+  background-color: #343232fd;
+  border-radius: 7px;
+  display: none;
+}
+
 .controls {
   text-align: center;
   margin-bottom: 20px;
