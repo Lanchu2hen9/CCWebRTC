@@ -39,7 +39,7 @@ YouSus.volume = 0.3;
 YouSus.loop = false;
 
 //#region RunningBtn
-const MouseSneak = 80;
+const MouseSneak = 35;
 const EdgePadding = 35;
 //#endregion
 
@@ -153,8 +153,8 @@ NameInput.addEventListener("keypress", (event) => {
 
 // Initial position of MuteBtn
 MuteBtn.style.position = "absolute";
-MuteBtn.style.left = "calc(50% - 125px)";
-MuteBtn.style.top = "calc(100vh - 100px)";
+MuteBtn.style.left = "calc(50% - 130px)";
+MuteBtn.style.top = "calc(100vh - 90px)";
 MuteBtn.style.transform = "translate(15px, 10px)";
 
 window.addEventListener("resize", () => {

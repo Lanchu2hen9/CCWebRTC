@@ -75,20 +75,35 @@ video {
 }
 
 .hangupButton {
-  padding: 10px 20px;
-  margin: 0 10px;
-  font-size: 1rem;
+  margin: 5px;
+  padding: 5px 5px 6px 5px;
   cursor: pointer;
   border: none;
-  border-radius: 4px;
+  border-radius: 15px;
   z-index: 5;
 
+  transition: all 0.3s ease-out;
+
   color: rgb(57, 88, 180);
-  background-color: #f9edb0;
+  background-color: #ffa591;
+
+  position: relative;
+  top: 7px;
+  left: 35px;
+}
+
+.hangupButton:hover {
+  background-color: #f78267;
+}
+
+.LeaveIcon {
+  position: relative;
+  top: 2px;
+  left: 2px;
 }
 
 .MuteBtn {
-  margin: 0;
+  margin: 5px;
   padding: 5px 5px 6px 5px;
   border: none;
   border-radius: 15px;
@@ -97,17 +112,21 @@ video {
   cursor: pointer;
 
   background-color: #f9edb0;
-  z-index: 7;
+  z-index: 100;
 }
 
 .CamBtn {
-  margin: 0;
-  padding: 5px 5px 6px 5px;
+  margin: 5px;
+  padding: 5px;
   border: none;
   border-radius: 15px;
   transition: all 0.3s ease-out;
   font-size: 1.2rem;
   cursor: pointer;
+
+  position: relative;
+  top: 7px;
+  left: 3px;
 
   background-color: #f9edb0;
   z-index: 5;
