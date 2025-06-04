@@ -42,6 +42,8 @@ YouSus.loop = false;
 const MouseSneak = 80;
 const EdgePadding = 35;
 //#endregion
+
+let frameCount = 0;
 //#endregion
 
 //#region Call Int Vars
@@ -71,6 +73,8 @@ let isPixelated = false;
 let IsMikeScreaming = false;
 let RunningAudPlaying = false;
 //#endregion
+
+let pixelationAnimationID = null; // Store the animation ID for pixelation
 const ROOM_ID = "default-room"; // Simple room ID for Deno KV signaling
 
 // #endregion
@@ -307,18 +311,50 @@ MuteBtn.addEventListener("click", () => {
 // User clicks => Camera turns off => User Clicks again => Camera turns on => Pixelated Video streams.
 // User Clicks => isPixelated false ==> User Clicks again ==> isPixalated true
 function PixelateAnimation() {
+  console.log(
+    "PixelateAnimation running - isPixelated:",
+    isPixelated,
+    "video ready:",
+    localVideo.readyState
+  );
+
+  frameCount++;
+  console.log(`🎬 Frame #${frameCount}:`, {
+    videoTime: localVideo.currentTime.toFixed(2),
+    videoPaused: localVideo.paused,
+    videoEnded: localVideo.ended,
+    streamActive: localStream?.active,
+    trackEnabled: localStream?.getVideoTracks()[0]?.enabled,
+  });
+
   if (
     isPixelated &&
     localStream &&
     localStream.active &&
-    localVideo.readyState >= localVideo.HAVE_CURRENT_DATA
+    localVideo.readyState >= localVideo.HAVE_CURRENT_DATA &&
+    cnv.width > 0 &&
+    cnv.height > 0
   ) {
     ctx.drawImage(localVideo, 0, 0, cnv.width, cnv.height);
+
     PixelateWebcamVideo();
 
-    requestAnimationFrame(PixelateAnimation);
+    pixelationAnimationID = requestAnimationFrame(PixelateAnimation);
+    // requestAnimationFrame(PixelateAnimation);
   } else if (isPixelated) {
-    requestAnimationFrame(PixelateAnimation);
+    console.log("Pixelation enabled but waiting for video to be ready...");
+    pixelationAnimationID = requestAnimationFrame(PixelateAnimation);
+  } else {
+    console.log("Pixelation animation stopped");
+    pixelationAnimationID = null;
+  }
+}
+
+function stopPixelationAnimation() {
+  if (pixelationAnimationID) {
+    cancelAnimationFrame(pixelationAnimationID);
+    pixelationAnimationID = null;
+    console.log("Pixelation animation cancelled.");
   }
 }
 
@@ -352,6 +388,10 @@ CameraBtn.addEventListener("click", () => {
     // const WebcamVid = videoTracks[0];
     // WebcamVid.enabled = false;
 
+    stopPixelationAnimation();
+    localVideo.style.display = "block";
+    cnv.style.display = "none";
+
     CameraBtn.classList.add("off");
     CameraIcon.src = "./VideoCall-Hide.png";
     alert("🤨 What are you hiding?");
@@ -368,14 +408,26 @@ CameraBtn.addEventListener("click", () => {
         cnv.width = localVideo.videoWidth;
         cnv.height = localVideo.videoHeight;
 
-        localVideo.style.display = "none";
+        console.log(`Canvas setup: ${cnv.width}x${cnv.height}`);
+
+        // localVideo.style.display = "none";
+
+        localVideo.style.position = "absolute";
+        localVideo.style.zIndex = "1"; // Video behind
+        cnv.style.position = "absolute";
+        cnv.style.zIndex = "2"; // Canvas in front
+        cnv.style.display = "block";
+
         cnv.style.display = "block";
         isPixelated = true;
+
         PixelateAnimation();
+        console.log("Pixelation setup complete, animation started");
       } else {
         console.warn(
           "Video Metadata not ready for canvas setup (width/height is 0). Retrying soon."
         );
+        setTimeout(setupCanvasForPixelation, 100);
       }
     };
 
