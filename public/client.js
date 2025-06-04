@@ -43,7 +43,8 @@ const MouseSneak = 80;
 const EdgePadding = 35;
 //#endregion
 
-let frameCount = 0;
+// let frameCount = 0;
+
 //#endregion
 
 //#region Call Int Vars
@@ -147,22 +148,6 @@ NameInput.addEventListener("keypress", (event) => {
 
 //#region Run Away Logic
 
-// let WindowWidth = window.innerWidth;
-// let WindowHeight = window.innerHeight;
-// // Getting the window dimesions so that the buttons
-// // know the area in which it can run away to.
-
-// window.addEventListener("resize", () => {
-//   WindowWidth = window.innerWidth;
-//   WindowHeight = window.innerHeight;
-// });
-// // Resizes the window dimensions.
-
-//MuteButton Hitbox
-// const InitialHitBox = MuteBtn.getBoundingClientRect();
-// const LHitbox = InitialHitBox.left;
-// const TopHitbox = InitialHitBox.top;
-
 // Initial position of MuteBtn
 MuteBtn.style.position = "absolute";
 MuteBtn.style.left = "calc(50% - 125px)";
@@ -199,14 +184,6 @@ document.addEventListener("mousemove", (e) => {
 
   const mouseX = e.clientX;
   const mouseY = e.clientY;
-
-  // const DistanceToLeft = buttonRect.left;
-  // const DistanceToRight = WindowWidth - (buttonRect.left + buttonRect.width);
-  // const DistanceToTop = buttonRect.top;
-  // const DistanceToBottom = WindowHeight - (buttonRect.top + buttonRect.height);
-
-  // VerticalDistance = DistanceToTop + DistanceToBottom - EdgePadding * 2;
-  // horiDistance = DistanceToLeft + DistanceToRight - EdgePadding * 2;
 
   // the distance between the mouse and the button's center
   const distance = Math.sqrt(
@@ -291,13 +268,6 @@ MuteBtn.addEventListener("click", () => {
     console.log("Stopped running audio.");
   }
 
-  // setTimeout(() => {
-  //   if (!IsMikeScreaming) {
-  //     Scream.play();
-  //     IsMikeScreaming = true;
-  //   }
-  // }, 100);
-
   if (!IsMikeScreaming) {
     Scream.play();
     IsMikeScreaming = true;
@@ -318,14 +288,14 @@ function PixelateAnimation() {
     localVideo.readyState
   );
 
-  frameCount++;
-  console.log(`🎬 Frame #${frameCount}:`, {
-    videoTime: localVideo.currentTime.toFixed(2),
-    videoPaused: localVideo.paused,
-    videoEnded: localVideo.ended,
-    streamActive: localStream?.active,
-    trackEnabled: localStream?.getVideoTracks()[0]?.enabled,
-  });
+  // frameCount++;
+  // console.log(`🎬 Frame #${frameCount}:`, {
+  //   videoTime: localVideo.currentTime.toFixed(2),
+  //   videoPaused: localVideo.paused,
+  //   videoEnded: localVideo.ended,
+  //   streamActive: localStream?.active,
+  //   trackEnabled: localStream?.getVideoTracks()[0]?.enabled,
+  // });
 
   if (
     isPixelated &&
@@ -410,15 +380,11 @@ CameraBtn.addEventListener("click", () => {
 
         console.log(`Canvas setup: ${cnv.width}x${cnv.height}`);
 
-        // localVideo.style.display = "none";
-
         localVideo.style.position = "absolute";
-        localVideo.style.zIndex = "1"; // Video behind
-        cnv.style.position = "absolute";
-        cnv.style.zIndex = "2"; // Canvas in front
-        cnv.style.display = "block";
+        localVideo.style.zIndex = "1";
 
         cnv.style.display = "block";
+
         isPixelated = true;
 
         PixelateAnimation();
@@ -444,37 +410,6 @@ CameraBtn.addEventListener("click", () => {
     CameraBtn.classList.remove("off");
     CameraIcon.src =
       "https://img.icons8.com/?size=100&id=QccisbQJF3lB&format=png&color=3958B4";
-
-    // localVideo.addEventListener("loadedmetadata", () => {
-    //   cnv.width = localVideo.videoWidth;
-    //   cnv.height = localVideo.videoHeight;
-    // });
-
-    // cnv.width = localVideo.videoWidth;
-    // cnv.height = localVideo.videoHeight;
-
-    // localVideo.onloadedmetadata = () => {
-    //   cnv.width = localVideo.videoWidth;
-    //   cnv.height = localVideo.videoHeight;
-    //   localVideo.style.display = "none";
-    //   cnv.style.display = "block";
-    //   isPixelated = true;
-    //   PixelateAnimation();
-    // };
-
-    // if (localVideo.readyState >= 2) {
-    //   cnv.width = localVideo.videoWidth;
-    //   cnv.height = localVideo.videoHeight;
-    //   localVideo.style.display = "none";
-    //   cnv.style.display = "block";
-    //   isPixelated = true;
-    //   PixelateAnimation();
-    // }
-
-    // localVideo.style.display = "none";
-    // cnv.style.display = "block";
-    // isPixelated = true;
-    // PixelateAnimation();
   }
 });
 
