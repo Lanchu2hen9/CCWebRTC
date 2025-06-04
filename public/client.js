@@ -61,7 +61,7 @@ const MuteIcon = document.querySelector("#MuteIcon");
 // This is for the pixelate video effect.
 
 const cnv = document.querySelector("#cnv_element");
-const ctx = cnv.getContext(`2d`);
+const ctx = cnv.getContext("2d", { willReadFrequently: true });
 //#endregion
 
 //#region Bool Vars
@@ -315,6 +315,7 @@ function PixelateAnimation() {
   ) {
     ctx.drawImage(localVideo, 0, 0, cnv.width, cnv.height);
     PixelateWebcamVideo();
+
     requestAnimationFrame(PixelateAnimation);
   } else if (isPixelated) {
     requestAnimationFrame(PixelateAnimation);
@@ -438,7 +439,7 @@ function PixelateWebcamVideo() {
   const VidImageData = ctx.getImageData(0, 0, cnv.width, cnv.height);
   const RawPixelData = VidImageData.data;
   const PixelatedVidData = new Uint8ClampedArray(RawPixelData.length); // Use a more descriptive name
-  const PixelSize = 10; // Taste the Pixels!
+  const PixelSize = 15; // Taste the Pixels!
 
   for (let y = 0; y < cnv.height; y += PixelSize) {
     for (let x = 0; x < cnv.width; x += PixelSize) {
