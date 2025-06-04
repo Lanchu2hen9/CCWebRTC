@@ -73,6 +73,7 @@ let isCameraOn = true;
 let isPixelated = false;
 let IsMikeScreaming = false;
 let RunningAudPlaying = false;
+let isCallActive = false;
 //#endregion
 
 let pixelationAnimationID = null; // Store the animation ID for pixelation
@@ -107,6 +108,8 @@ StartButton.addEventListener("click", async () => {
       StartSection.style.display = "none";
       document.querySelector(".video-container").style.display = "flex";
       document.querySelector(".controls").style.display = "block";
+
+      isCallActive = true;
 
       const LocalName = document.querySelector("#UsernameLocal");
       LocalName.textContent = userName;
@@ -178,6 +181,8 @@ window.addEventListener("resize", () => {
 });
 
 document.addEventListener("mousemove", (e) => {
+  if (!isCallActive) return;
+
   const buttonRect = MuteBtn.getBoundingClientRect();
   const buttonCenterX = buttonRect.left + buttonRect.width / 2;
   const buttonCenterY = buttonRect.top + buttonRect.height / 2;
@@ -281,12 +286,12 @@ MuteBtn.addEventListener("click", () => {
 // User clicks => Camera turns off => User Clicks again => Camera turns on => Pixelated Video streams.
 // User Clicks => isPixelated false ==> User Clicks again ==> isPixalated true
 function PixelateAnimation() {
-  console.log(
-    "PixelateAnimation running - isPixelated:",
-    isPixelated,
-    "video ready:",
-    localVideo.readyState
-  );
+  // console.log(
+  //   "PixelateAnimation running - isPixelated:",
+  //   isPixelated,
+  //   "video ready:",
+  //   localVideo.readyState
+  // );
 
   // frameCount++;
   // console.log(`🎬 Frame #${frameCount}:`, {
@@ -800,6 +805,8 @@ function displayChatMessage(sender, message) {
 
 async function hangUp() {
   console.log("Hanging up session...");
+
+  isCallActive = false;
   if (peerConnection) {
     peerConnection.close();
     peerConnection = null;

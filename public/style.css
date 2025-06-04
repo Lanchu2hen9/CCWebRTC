@@ -153,11 +153,12 @@ video {
   cursor: not-allowed;
 }
 
-.chat-container {
+/* .chat-container {
   max-width: 600px;
   margin: 20px auto;
+  border-radius: 7px;
   border: 1px solid #ccc;
-  background-color: #fff;
+  background-color: #535252fd;
   padding: 15px;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
@@ -194,7 +195,7 @@ video {
   color: white;
   cursor: pointer;
   border-radius: 0 4px 4px 0;
-}
+} */
 
 /* #region Start Screen */
 .StartSection {
@@ -217,7 +218,7 @@ video {
   padding: 10px 20px;
   font-size: 18px;
   margin-bottom: 20px;
-  border: 2px solid #89b8eb;
+  border: 2px solid #f9edb0;
   border-radius: 5px;
   background-color: #fff;
   color: #333;
@@ -225,7 +226,7 @@ video {
 }
 
 .NameInput::placeholder {
-  color: #929090;
+  color: #a9a997;
 }
 
 .startButton {
@@ -235,17 +236,18 @@ video {
   cursor: pointer;
   border: none;
   border-radius: 4px;
-  background-color: #007bff;
-  color: white;
+  background-color: #f9edb0;
+  color: #3958b4;
 }
 
 .startButton:disabled {
   background-color: #ccc;
+  color: #919191;
   cursor: not-allowed;
 }
 
 .startButton:hover {
-  background-color: #0056b3;
+  background-color: #ffe665;
 }
 
 .Loading {
@@ -253,10 +255,11 @@ video {
 }
 
 .SpinnyBoi {
+  margin-left: 14px;
   width: 50px;
   height: 50px;
-  border: 5px solid #f3f3f3; /* Light grey */
-  border-top: 5px solid #3498db; /* Blue */
+  border: 5px solid #fdfdfd; /* Light grey */
+  border-top: 5px solid #f7ac2b; /* Blue */
   border-radius: 50%;
   animation: spin 2s linear infinite;
 }

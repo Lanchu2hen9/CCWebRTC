@@ -33,7 +33,7 @@
         type="text"
         id="NameInput"
         name="username"
-        placeholder="Enter Your Name."
+        placeholder="Enter Your Name"
         maxlength="20"
       />
       <button class="startButton" id="startButton">Start Call</button>
@@ -42,7 +42,6 @@
       <div class="video-box">
         <canvas id="cnv_element" class="VideoboxCanvas"></canvas>
         <video id="localVideo" autoplay playsinline muted></video>
-        <!-- <video hidden="true" id="localVideo" autoplay playsinline muted></video> -->
         <!-- You can add an `hidden = "true"` tag thingy to the html video object to hide it,
           later for the pixelated video object.-->
         <h2 id="UsernameLocal">Local</h2>
@@ -74,15 +73,17 @@
       <button class="hangupButton" id="hangupButton" disabled>Leave</button>
     </div>
 
-    <!-- <div class="chat-container">
-        <h2>Chat</h2>
-        <div id="chatLog" class="chat-log"></div>
-        <div class="chat-input">
-            <input type="text" id="chatInput" placeholder="Enter message...">
-            <button id="sendButton">Send</button>
-        </div>
+    <!-- Don't want to use the chat function of the template feel like it takes away from -->
+    <!-- The concept of WebRTC as a whole -->
+    <!-- 
+    <div class="chat-container">
+      <h2>Chat</h2>
+      <div id="chatLog" class="chat-log"></div>
+      <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="Enter message..." />
+        <button id="sendButton">Send</button>
+      </div>
     </div> -->
-
     <script src="client.js"></script>
   </body>
 </html>
