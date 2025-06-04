@@ -307,9 +307,16 @@ MuteBtn.addEventListener("click", () => {
 // User clicks => Camera turns off => User Clicks again => Camera turns on => Pixelated Video streams.
 // User Clicks => isPixelated false ==> User Clicks again ==> isPixalated true
 function PixelateAnimation() {
-  if (isPixelated) {
-    ctx.drawImage(PixelateWebcamVideo(), 0, 0, cnv.width, cnv.height);
+  if (
+    isPixelated &&
+    localStream &&
+    localStream.active &&
+    localVideo.readyState >= localVideo.HAVE_CURRENT_DATA
+  ) {
+    ctx.drawImage(localVideo, 0, 0, cnv.width, cnv.height);
     PixelateWebcamVideo();
+    requestAnimationFrame(PixelateAnimation);
+  } else if (isPixelated) {
     requestAnimationFrame(PixelateAnimation);
   }
 }
@@ -317,7 +324,18 @@ function PixelateAnimation() {
 CameraBtn.addEventListener("click", () => {
   const videoTracks = localStream.getVideoTracks();
 
+  if (!localStream) {
+    console.warn("Local stream not available to toggle camera.");
+    return;
+  }
+
+  if (videoTracks.length === 0) {
+    console.warn("No video tracks found in local stream.");
+    return;
+  }
+
   const videoTrack = videoTracks[0];
+
   if (isCameraOn === true) {
     isCameraOn = false;
     // Turns off the camera.
@@ -344,10 +362,40 @@ CameraBtn.addEventListener("click", () => {
     videoTrack.enabled = true;
     // Turns on the camera.
 
-    localVideo.addEventListener("loadedmetadata", () => {
-      cnv.width = localVideo.videoWidth;
-      cnv.height = localVideo.videoHeight;
-    });
+    const setupCanvasForPixelation = () => {
+      if (localVideo.videoWidth > 0 && localVideo.videoHeight > 0) {
+        cnv.width = localVideo.videoWidth;
+        cnv.height = localVideo.videoHeight;
+
+        localVideo.style.display = "none";
+        cnv.style.display = "block";
+        isPixelated = true;
+        PixelateAnimation();
+      } else {
+        console.warn(
+          "Video Metadata not ready for canvas setup (width/height is 0). Retrying soon."
+        );
+      }
+    };
+
+    if (localVideo.readyState >= localVideo.HAVE_METADATA) {
+      // HAVE_METADATA is 1
+      setupCanvasForPixelation();
+    } else {
+      // Wait for metadata to load
+      localVideo.addEventListener("loadedmetadata", setupCanvasForPixelation, {
+        once: true,
+      });
+    }
+
+    CameraBtn.classList.remove("off");
+    CameraIcon.src =
+      "https://img.icons8.com/?size=100&id=QccisbQJF3lB&format=png&color=3958B4";
+
+    // localVideo.addEventListener("loadedmetadata", () => {
+    //   cnv.width = localVideo.videoWidth;
+    //   cnv.height = localVideo.videoHeight;
+    // });
 
     // cnv.width = localVideo.videoWidth;
     // cnv.height = localVideo.videoHeight;
@@ -370,14 +418,10 @@ CameraBtn.addEventListener("click", () => {
     //   PixelateAnimation();
     // }
 
-    localVideo.style.display = "none";
-    cnv.style.display = "block";
-    isPixelated = true;
-    PixelateAnimation();
-
-    CameraBtn.classList.remove("off");
-    CameraIcon.src =
-      "https://img.icons8.com/?size=100&id=QccisbQJF3lB&format=png&color=3958B4";
+    // localVideo.style.display = "none";
+    // cnv.style.display = "block";
+    // isPixelated = true;
+    // PixelateAnimation();
   }
 });
 
@@ -386,66 +430,63 @@ CameraBtn.addEventListener("click", () => {
 // Function to pixelate the video:
 
 function PixelateWebcamVideo() {
+  if (cnv.width === 0 || cnv.height === 0) {
+    console.warn("Canvas dimensions are zero, skipping pixelation.");
+    return;
+  }
+
   const VidImageData = ctx.getImageData(0, 0, cnv.width, cnv.height);
-  // Gets the image data from the top-left corner of the canvas to the
-  // width and height of the canvas.
-
   const RawPixelData = VidImageData.data;
-  // Grabs the pixel data from the individual frame of the video, and
-  // turns it into useable data for the rest of the code to process.
+  const PixelatedVidData = new Uint8ClampedArray(RawPixelData.length); // Use a more descriptive name
+  const PixelSize = 10; // Taste the Pixels!
 
-  const PixelatedVid = new Uint8ClampedArray(RawPixelData.length);
-  // Creates a new array-like object to store the "cooked" freshly
-  // video data.
-
-  const PixelSize = 10; // ✨🌈Taste the Pixels! 🌈 ✨
-
-  // Outside for loop, telling the code to iterate by "PixelSize unit" through
-  // the y bit of `.getImageData(0, y, cnv.width, cnv.height);`
-  // until it reaches the limit height of the canvas.
   for (let y = 0; y < cnv.height; y += PixelSize) {
-    // Samething but instead of y, its the x-coordinate now.
     for (let x = 0; x < cnv.width; x += PixelSize) {
-      let r = 0;
-      let g = 0;
-      let b = 0;
-      let alpha = 0;
+      let r_sum = 0;
+      let g_sum = 0;
+      let b_sum = 0;
+      let a_sum = 0;
       let count = 0;
 
+      // Calculate the average color of the current block
       for (let dy = 0; dy < PixelSize && y + dy < cnv.height; dy++) {
-        // scans each row in the "PixelSize by PixelSize" grid.
-
         for (let dx = 0; dx < PixelSize && x + dx < cnv.width; dx++) {
-          // scans each column in the "PixelSize by PixelSize" grid.
-
           const index = ((y + dy) * cnv.width + (x + dx)) * 4;
-          // The current index in the "PixelSize" unit y down
-          // + dy times the width of the whole ass canvas
-          // + the "PixelSize" unit y across + dx.
-
-          r += RawPixelData[index];
-          g += RawPixelData[index + 1];
-          b += RawPixelData[index + 2];
-          alpha += RawPixelData[index + 3];
+          r_sum += RawPixelData[index];
+          g_sum += RawPixelData[index + 1];
+          b_sum += RawPixelData[index + 2];
+          a_sum += RawPixelData[index + 3];
           count++;
         }
       }
 
-      for (let dy = 0; dy < PixelSize && y + dy < cnv.height; dy++) {
-        for (let dx = 0; dx < PixelSize && x + dx < cnv.width; dx++) {
-          const index = ((y + dy) * cnv.width + (x + dx)) * 4;
-          PixelatedVid[index] = r;
-          PixelatedVid[index + 1] = g;
-          PixelatedVid[index + 2] = b;
-          PixelatedVid[index + 3] = alpha;
+      if (count > 0) {
+        const r_avg = r_sum / count;
+        const g_avg = g_sum / count;
+        const b_avg = b_sum / count;
+        const a_avg = a_sum / count; // Average alpha too, or use 255 for full opacity
+
+        // Apply the average color to all pixels in the block
+        for (let dy = 0; dy < PixelSize && y + dy < cnv.height; dy++) {
+          for (let dx = 0; dx < PixelSize && x + dx < cnv.width; dx++) {
+            const index = ((y + dy) * cnv.width + (x + dx)) * 4;
+            PixelatedVidData[index] = r_avg;
+            PixelatedVidData[index + 1] = g_avg;
+            PixelatedVidData[index + 2] = b_avg;
+            PixelatedVidData[index + 3] = a_avg;
+          }
         }
       }
     }
   }
-  const PixelatedImageData = new ImageData(PixelatedVid, cnv.width, cnv.height);
+  const PixelatedImageData = new ImageData(
+    PixelatedVidData,
+    cnv.width,
+    cnv.height
+  );
   ctx.putImageData(PixelatedImageData, 0, 0);
 }
-const WebcamVids = localStream.getVideoTracks();
+// const WebcamVids = localStream.getVideoTracks();
 
 // #endregion
 
