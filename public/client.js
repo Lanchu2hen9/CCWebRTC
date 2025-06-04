@@ -431,7 +431,7 @@ function PixelateWebcamVideo() {
   const VidImageData = ctx.getImageData(0, 0, cnv.width, cnv.height);
   const RawPixelData = VidImageData.data;
   const PixelatedVidData = new Uint8ClampedArray(RawPixelData.length); // Use a more descriptive name
-  const PixelSize = 15; // Taste the Pixels!
+  const PixelSize = 30; // Taste the Pixels!
 
   for (let y = 0; y < cnv.height; y += PixelSize) {
     for (let x = 0; x < cnv.width; x += PixelSize) {
