@@ -1,7 +1,19 @@
 // #region Global
 // Global ICE configuration, starts with a fallback
+// let iceConfiguration = {
+//   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+// };
+
 let iceConfiguration = {
-  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" },
+    {
+      urls: "turn:openrelay.metered.ca:80",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+  ],
 };
 
 //#region StartVars
@@ -77,7 +89,22 @@ let isCallActive = false;
 //#endregion
 
 let pixelationAnimationID = null; // Store the animation ID for pixelation
-const ROOM_ID = "default-room"; // Simple room ID for Deno KV signaling
+// const ROOM_ID = "default-room"; // Simple room ID for Deno KV signaling
+
+// Generate unique room ID or use URL parameter
+const urlParams = new URLSearchParams(window.location.search);
+const ROOM_ID =
+  urlParams.get("room") || "room-" + Math.random().toString(36).substr(2, 9);
+
+// Update URL so people can share the same room
+if (!urlParams.get("room")) {
+  window.history.replaceState(
+    {},
+    "",
+    `${window.location.pathname}?room=${ROOM_ID}`
+  );
+  console.log("Share this URL with the other person:", window.location.href);
+}
 
 // #endregion
 
@@ -546,7 +573,11 @@ async function startSession() {
     console.log("Received local stream.");
 
     // ---- Determine role FIRST ----
+    // const offerSignal = await getSignalMessage("offer");
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     const offerSignal = await getSignalMessage("offer");
+
     if (!offerSignal || !offerSignal.payload) {
       isInitiator = true;
       console.log("This client will be the initiator.");
