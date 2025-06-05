@@ -715,49 +715,33 @@ function setupDataChannelEvents(channel) {
     `Setting up data channel event listeners for channel '${channel.label}', current readyState: ${channel.readyState}`
   );
 
+  // Single onopen handler for username exchange
   channel.onopen = () => {
     console.log(`Data channel '${channel.label}' is open.`);
+    // Send username when connection opens
     sendUsername();
+    console.log("Data channel connected - ready for username exchange!");
   };
 
-  // channel.onmessage = (event) => {
-  //   try {
-  //     const messageData = JSON.parse(event.data);
-  //     // Always display received messages as "Remote"
-  //     displayChatMessage("Remote", messageData.message);
-  //   } catch (_e) {
-  //     // Fallback for non-JSON messages, also label as Remote
-  //     displayChatMessage("Remote (raw)", event.data);
-  //   }
-  // };
-
-  // channel.onerror = (error) => {
-  //   console.error(`Data channel '${channel.label}' ERROR:`, error);
-  // };
-  // // ADD THIS to see if it's already open when events are attached (less likely but possible)
-  // if (channel.readyState === "open") {
-  //   console.warn(
-  //     `Data channel '${channel.label}' was already open when event listeners were attached.`
-  //   );
-  //   // Manually trigger open state logic if so (though onopen should still fire)
-  //   chatInput.disabled = false;
-  //   sendButton.disabled = false;
-  //   displayChatMessage("System", "Chat connected (already open)!");
-  // }
-
+  // Single onmessage handler for username exchange only
   channel.onmessage = (event) => {
+    console.log(
+      `Message received on data channel: ${event.data.substring(0, 50)}...`
+    );
     try {
       const messageData = JSON.parse(event.data);
       if (messageData.type === "username") {
-        // Update remote username
+        // Update remote username display
         const RemoteName = document.querySelector("#UsernameRemote");
-        RemoteName.textContent = messageData.username;
-      } else {
-        // Handle regular chat messages
-        displayChatMessage("Remote", messageData.message);
+        if (RemoteName) {
+          RemoteName.textContent = messageData.username;
+          console.log(`Remote username set to: ${messageData.username}`);
+        }
       }
-    } catch (_e) {
-      displayChatMessage("Remote (raw)", event.data);
+      // NOTE: No more chat message handling - only usernames!
+    } catch (error) {
+      // Log any parsing errors - no more displayChatMessage calls
+      console.warn("Could not parse data channel message:", event.data, error);
     }
   };
 
@@ -765,100 +749,24 @@ function setupDataChannelEvents(channel) {
     console.log(`Data channel '${channel.label}' is closed.`);
   };
 
-  // channel.onopen = () => {
-  //   console.log(`Data channel '${channel.label}' is open.`);
-  //   chatInput.disabled = false;
-  //   sendButton.disabled = false;
-  //   displayChatMessage("System", "Chat connected!");
-  //   // Send username when connection opens
-  //   sendUsername();
-  // };
-}
-
-// function sendMessage() {
-//   const messageText = chatInput.value;
-//   if (messageText && dataChannel && dataChannel.readyState === "open") {
-//     const messagePayload = {
-//       // sender: "Local", // Not strictly needed in the payload, receiver assumes it's remote
-//       message: messageText,
-//     };
-//     dataChannel.send(JSON.stringify(messagePayload));
-//     displayChatMessage("Local", messageText);
-//     chatInput.value = "";
-//   } else {
-//     console.warn(
-//       "Cannot send message. Data channel not open or message empty."
-//     );
-//   }
-// }
-
-// function displayChatMessage(sender, message) {
-//   const p = document.createElement("p");
-//   p.textContent = `[${sender}]: ${message}`;
-//   chatLog.appendChild(p);
-//   chatLog.scrollTop = chatLog.scrollHeight;
-// }
-
-async function hangUp() {
-  console.log("Hanging up session...");
-
-  isCallActive = false;
-  if (peerConnection) {
-    peerConnection.close();
-    peerConnection = null;
-  }
-  if (localStream) {
-    localStream.getTracks().forEach((track) => track.stop());
-  }
-  localStream = null;
-
-  if (remoteStream) {
-    remoteStream.getTracks().forEach((track) => track.stop());
-  }
-  remoteStream = null;
-
-  if (dataChannel) {
-    dataChannel.close();
-    dataChannel = null;
-  }
-
-  localVideo.srcObject = null;
-  remoteVideo.srcObject = null;
-
-  startButton.disabled = false;
-  hangupButton.disabled = true;
-  // chatInput.disabled = true;
-  // sendButton.disabled = true;
-
-  console.log(
-    "Attempting to clear offer/answer signals from server for this room..."
-  );
-  await clearSignalMessage("offer"); // For offer
-  await clearSignalMessage("answer"); // For answer
-  // Note: Candidate clearing in hangUp is now less effective as specific keys are needed.
-  // Individual candidates are cleared during polling. Aggressive cleanup here would require
-  // fetching all candidate keys for the room and deleting them, or a specific server endpoint.
-  console.log("Session terminated.");
-  isInitiator = false;
-}
-
-async function sendSignalMessage(type, payload) {
-  try {
-    console.log(`Sending signal type: ${type} to /signal`);
-    const response = await fetch(`/signal?room=${ROOM_ID}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: type, payload: payload }),
-    });
-    if (!response.ok) {
-      console.error(
-        `Failed to send signal message ${type}:`,
-        response.status,
-        await response.text()
-      );
+  async function sendSignalMessage(type, payload) {
+    try {
+      console.log(`Sending signal type: ${type} to /signal`);
+      const response = await fetch(`/signal?room=${ROOM_ID}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: type, payload: payload }),
+      });
+      if (!response.ok) {
+        console.error(
+          `Failed to send signal message ${type}:`,
+          response.status,
+          await response.text()
+        );
+      }
+    } catch (error) {
+      console.error(`Error sending signal message ${type}:`, error);
     }
-  } catch (error) {
-    console.error(`Error sending signal message ${type}:`, error);
   }
 }
 
@@ -1097,7 +1005,5 @@ async function clearSignalMessage(type, candidateKeyString = null) {
 
 // Initial UI state
 hangupButton.disabled = true;
-chatInput.disabled = true;
-sendButton.disabled = true;
 
 console.log("Client script loaded. Ready for user to start session.");
