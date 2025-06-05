@@ -49,9 +49,9 @@ const EdgePadding = 35;
 
 //#region Call Int Vars
 const hangupButton = document.getElementById("hangupButton");
-const chatLog = document.getElementById("chatLog");
-const chatInput = document.getElementById("chatInput");
-const sendButton = document.getElementById("sendButton");
+// const chatLog = document.getElementById("chatLog");
+// const chatInput = document.getElementById("chatInput");
+// const sendButton = document.getElementById("sendButton");
 
 const CameraBtn = document.querySelector("#CamButton");
 const CameraIcon = document.querySelector("#CamIcon");
@@ -84,7 +84,7 @@ const ROOM_ID = "default-room"; // Simple room ID for Deno KV signaling
 // #region Start Section
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelector(".video-container").style.display = "none";
-  document.querySelector(".controls").style.displahy = "none";
+  document.querySelector(".controls").style.display = "none";
 });
 
 StartButton.addEventListener("click", async () => {
@@ -519,14 +519,14 @@ async function fetchIceServers() {
 
 // #region Video Call & Chat Eventlistners
 // --- Initialization and Event Listeners ---
-startButton.addEventListener("click", startSession);
-hangupButton.addEventListener("click", hangUp);
-sendButton.addEventListener("click", sendMessage);
-chatInput.addEventListener("keypress", (event) => {
-  if (event.key === "Enter" && !sendButton.disabled) {
-    sendMessage();
-  }
-});
+// startButton.addEventListener("click", startSession);
+// hangupButton.addEventListener("click", hangUp);
+// sendButton.addEventListener("click", sendMessage);
+// chatInput.addEventListener("keypress", (event) => {
+//   if (event.key === "Enter" && !sendButton.disabled) {
+//     sendMessage();
+//   }
+// });
 // #endregion
 
 async function startSession() {
@@ -714,44 +714,36 @@ function setupDataChannelEvents(channel) {
   console.log(
     `Setting up data channel event listeners for channel '${channel.label}', current readyState: ${channel.readyState}`
   );
+
   channel.onopen = () => {
     console.log(`Data channel '${channel.label}' is open.`);
-    chatInput.disabled = false;
-    sendButton.disabled = false;
-    displayChatMessage("System", "Chat connected!");
+    sendUsername();
   };
-  channel.onclose = () => {
-    console.log(`Data channel '${channel.label}' is closed.`);
-    chatInput.disabled = true;
-    sendButton.disabled = true;
-    displayChatMessage("System", "Chat disconnected.");
-  };
-  channel.onmessage = (event) => {
-    console.log(
-      `Message received on data channel: ${event.data.substring(0, 50)}...`
-    );
-    try {
-      const messageData = JSON.parse(event.data);
-      // Always display received messages as "Remote"
-      displayChatMessage("Remote", messageData.message);
-    } catch (_e) {
-      // Fallback for non-JSON messages, also label as Remote
-      displayChatMessage("Remote (raw)", event.data);
-    }
-  };
-  channel.onerror = (error) => {
-    console.error(`Data channel '${channel.label}' ERROR:`, error);
-  };
-  // ADD THIS to see if it's already open when events are attached (less likely but possible)
-  if (channel.readyState === "open") {
-    console.warn(
-      `Data channel '${channel.label}' was already open when event listeners were attached.`
-    );
-    // Manually trigger open state logic if so (though onopen should still fire)
-    chatInput.disabled = false;
-    sendButton.disabled = false;
-    displayChatMessage("System", "Chat connected (already open)!");
-  }
+
+  // channel.onmessage = (event) => {
+  //   try {
+  //     const messageData = JSON.parse(event.data);
+  //     // Always display received messages as "Remote"
+  //     displayChatMessage("Remote", messageData.message);
+  //   } catch (_e) {
+  //     // Fallback for non-JSON messages, also label as Remote
+  //     displayChatMessage("Remote (raw)", event.data);
+  //   }
+  // };
+
+  // channel.onerror = (error) => {
+  //   console.error(`Data channel '${channel.label}' ERROR:`, error);
+  // };
+  // // ADD THIS to see if it's already open when events are attached (less likely but possible)
+  // if (channel.readyState === "open") {
+  //   console.warn(
+  //     `Data channel '${channel.label}' was already open when event listeners were attached.`
+  //   );
+  //   // Manually trigger open state logic if so (though onopen should still fire)
+  //   chatInput.disabled = false;
+  //   sendButton.disabled = false;
+  //   displayChatMessage("System", "Chat connected (already open)!");
+  // }
 
   channel.onmessage = (event) => {
     try {
@@ -769,39 +761,43 @@ function setupDataChannelEvents(channel) {
     }
   };
 
-  channel.onopen = () => {
-    console.log(`Data channel '${channel.label}' is open.`);
-    chatInput.disabled = false;
-    sendButton.disabled = false;
-    displayChatMessage("System", "Chat connected!");
-    // Send username when connection opens
-    sendUsername();
+  channel.onclose = () => {
+    console.log(`Data channel '${channel.label}' is closed.`);
   };
+
+  // channel.onopen = () => {
+  //   console.log(`Data channel '${channel.label}' is open.`);
+  //   chatInput.disabled = false;
+  //   sendButton.disabled = false;
+  //   displayChatMessage("System", "Chat connected!");
+  //   // Send username when connection opens
+  //   sendUsername();
+  // };
 }
 
-function sendMessage() {
-  const messageText = chatInput.value;
-  if (messageText && dataChannel && dataChannel.readyState === "open") {
-    const messagePayload = {
-      // sender: "Local", // Not strictly needed in the payload, receiver assumes it's remote
-      message: messageText,
-    };
-    dataChannel.send(JSON.stringify(messagePayload));
-    displayChatMessage("Local", messageText);
-    chatInput.value = "";
-  } else {
-    console.warn(
-      "Cannot send message. Data channel not open or message empty."
-    );
-  }
-}
+// function sendMessage() {
+//   const messageText = chatInput.value;
+//   if (messageText && dataChannel && dataChannel.readyState === "open") {
+//     const messagePayload = {
+//       // sender: "Local", // Not strictly needed in the payload, receiver assumes it's remote
+//       message: messageText,
+//     };
+//     dataChannel.send(JSON.stringify(messagePayload));
+//     displayChatMessage("Local", messageText);
+//     chatInput.value = "";
+//   } else {
+//     console.warn(
+//       "Cannot send message. Data channel not open or message empty."
+//     );
+//   }
+// }
 
-function displayChatMessage(sender, message) {
-  const p = document.createElement("p");
-  p.textContent = `[${sender}]: ${message}`;
-  chatLog.appendChild(p);
-  chatLog.scrollTop = chatLog.scrollHeight;
-}
+// function displayChatMessage(sender, message) {
+//   const p = document.createElement("p");
+//   p.textContent = `[${sender}]: ${message}`;
+//   chatLog.appendChild(p);
+//   chatLog.scrollTop = chatLog.scrollHeight;
+// }
 
 async function hangUp() {
   console.log("Hanging up session...");
@@ -831,8 +827,8 @@ async function hangUp() {
 
   startButton.disabled = false;
   hangupButton.disabled = true;
-  chatInput.disabled = true;
-  sendButton.disabled = true;
+  // chatInput.disabled = true;
+  // sendButton.disabled = true;
 
   console.log(
     "Attempting to clear offer/answer signals from server for this room..."
