@@ -748,25 +748,25 @@ function setupDataChannelEvents(channel) {
   channel.onclose = () => {
     console.log(`Data channel '${channel.label}' is closed.`);
   };
+}
 
-  async function sendSignalMessage(type, payload) {
-    try {
-      console.log(`Sending signal type: ${type} to /signal`);
-      const response = await fetch(`/signal?room=${ROOM_ID}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: type, payload: payload }),
-      });
-      if (!response.ok) {
-        console.error(
-          `Failed to send signal message ${type}:`,
-          response.status,
-          await response.text()
-        );
-      }
-    } catch (error) {
-      console.error(`Error sending signal message ${type}:`, error);
+async function sendSignalMessage(type, payload) {
+  try {
+    console.log(`Sending signal type: ${type} to /signal`);
+    const response = await fetch(`/signal?room=${ROOM_ID}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: type, payload: payload }),
+    });
+    if (!response.ok) {
+      console.error(
+        `Failed to send signal message ${type}:`,
+        response.status,
+        await response.text()
+      );
     }
+  } catch (error) {
+    console.error(`Error sending signal message ${type}:`, error);
   }
 }
 
